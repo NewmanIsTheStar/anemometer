@@ -48,7 +48,7 @@ add_compile_definitions(FAKE_RTC)
 include(pico-sdk/pico_sdk_init.cmake)
 
 # set the project name ${PROJECT_NAME}
-project(usurper C CXX ASM)
+project(thermostat C CXX ASM)
 
 # Initialise the Raspberry Pi Pico SDK
 pico_sdk_init()

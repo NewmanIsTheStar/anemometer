@@ -48,15 +48,15 @@ extern NON_VOL_VARIABLES_T config;
 extern WEB_VARIABLES_T web;
 
 // global variables
-const uint8_t aht10_addr = 0x38;                                // i2c address of aht10 chip
-const uint8_t aht10_busy_mask = 0x80;                           // aht10 busy bit in first rx byte
-const uint8_t aht10_calibrated_mask = 0x08;                     // aht10 calibrated bit in first rx byte
-const uint ath10_i2c_timeout_us = 50000;                        // i2c timeout when reading or writing
-const uint8_t aht10_i2c_initialize[]  = {0xe1, 0x08, 0x00};     // initialize, use_factory_calibration, nop
-const uint8_t aht10_i2c_measurement[] = {0xac, 0x33, 0x00};     // start, measurement, nop
-const uint8_t aht10_soft_reset[]  = {0xba};                     // soft_reset
-bool ath10_gpio_ok = false;                                     // ok to use configured gpio
-i2c_inst_t *ath10_i2c_block = NULL;                                   // i2c block to use
+static const uint8_t aht10_addr = 0x38;                                // i2c address of aht10 chip
+static const uint8_t aht10_busy_mask = 0x80;                           // aht10 busy bit in first rx byte
+static const uint8_t aht10_calibrated_mask = 0x08;                     // aht10 calibrated bit in first rx byte
+static const uint ath10_i2c_timeout_us = 50000;                        // i2c timeout when reading or writing
+static const uint8_t aht10_i2c_initialize[]  = {0xe1, 0x08, 0x00};     // initialize, use_factory_calibration, nop
+static const uint8_t aht10_i2c_measurement[] = {0xac, 0x33, 0x00};     // start, measurement, nop
+static const uint8_t aht10_soft_reset[]  = {0xba};                     // soft_reset
+static bool ath10_gpio_ok = false;                                     // ok to use configured gpio
+static i2c_inst_t *ath10_i2c_block = NULL;                             // i2c block to use
 
 int aht10_initialize(int clock_gpio, int data_gpio)
 {

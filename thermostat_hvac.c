@@ -69,7 +69,7 @@ int hvac_timer_start(CLIMATE_TIMER_INDEX_T timer_index, int minutes);
 int hvac_timer_stop(CLIMATE_TIMER_INDEX_T timer_index);
 bool hvac_timer_expired(CLIMATE_TIMER_INDEX_T timer_index);
 void vTimerCallback(TimerHandle_t xTimer);
-int update_current_setpoints(THERMOSTAT_STATE_T last_active, long int temperaturex10);
+int update_current_setpoints(THERMOSTAT_STATE_T last_active, long int temperaturex10, int temporary_set_point_offsetx10);
 long int sanitize_setpoint(long int setpoint);
 bool temporary_setpoint_offset_changed(void);
 int thermostat_relay_lockout_stop(void);
@@ -80,11 +80,9 @@ extern WEB_VARIABLES_T web;
 //extern long int temperaturex10;
 
 // gloabl variables
-THERMOSTAT_MODE_T scheduled_mode = HVAC_AUTO;            // scheduled mode
-int setpointtemperaturex10 = 0;                          // scheduled setpoint
-int temporary_set_point_offsetx10 = 0;                   // temporary offset set using physical buttons
-CLIMATE_TIMERS_T climate_timers[NUM_HVAC_TIMERS];        // set of timers used to control state
-bool relay_gpio_ok = false;                              // ok to use configured gpio
+static THERMOSTAT_MODE_T scheduled_mode = HVAC_AUTO;         // scheduled mode
+static CLIMATE_TIMERS_T climate_timers[NUM_HVAC_TIMERS];     // set of timers used to control state
+static bool relay_gpio_ok = false;                           // ok to use configured gpio
 
 /*!
  * \brief Open or close relay based on schedule and climate conditions
@@ -102,9 +100,13 @@ THERMOSTAT_STATE_T control_thermostat_relays(long int temperaturex10)
     bool cooling_allowed = false;
     bool heating_allowed = false;
     bool fan_allowed = false;     
+    int temporary_set_point_offsetx10 = 0;  
+
+    // check for temperature offset entered on front panel display
+    temporary_set_point_offsetx10 = display_get_setpoint_offset();
 
     // determine current setpoints based on schedule, powerwall status and last cycle
-    update_current_setpoints(last_active, temperaturex10);
+    update_current_setpoints(last_active, temperaturex10, temporary_set_point_offsetx10);
 
     // determine effective mode
     front_panel_mode = get_front_panel_mode();
@@ -574,8 +576,9 @@ void vTimerCallback(TimerHandle_t xTimer)
  * 
  * \return nothing
  */
-int update_current_setpoints(THERMOSTAT_STATE_T last_active, long int temperaturex10)
+int update_current_setpoints(THERMOSTAT_STATE_T last_active, long int temperaturex10, int temporary_set_point_offsetx10)
 {
+    int err = 0;
     static SETPOINT_BIAS_T setpoint_bias = SETPOINT_BIAS_UNDEFINED;
     int i;
     int mow;
@@ -616,8 +619,8 @@ int update_current_setpoints(THERMOSTAT_STATE_T last_active, long int temperatur
             }
         }
 
-        setpointtemperaturex10 = candidate_temperature;
-        scheduled_mode = candidate_mode;
+        //setpointtemperaturex10 = candidate_temperature; // TODO: delete -- set in all cases below
+        scheduled_mode = candidate_mode;                // TODO: access function and/or move to web vairable
     }
 
     // check if we've entered a new schedule period
@@ -630,7 +633,8 @@ int update_current_setpoints(THERMOSTAT_STATE_T last_active, long int temperatur
     }  
 
     // sanitize setpoints
-    setpointtemperaturex10 = sanitize_setpoint(setpointtemperaturex10);
+    //setpointtemperaturex10 = sanitize_setpoint(setpointtemperaturex10);
+    candidate_temperature = sanitize_setpoint(candidate_temperature);
     candidate_heating_temperature = sanitize_setpoint(candidate_heating_temperature);
     candidate_cooling_temperature = sanitize_setpoint(candidate_cooling_temperature);
 
@@ -689,7 +693,10 @@ int update_current_setpoints(THERMOSTAT_STATE_T last_active, long int temperatur
                 web.thermostat_heating_set_point -= (3*config.thermostat_hysteresis);       
             }
             break;    
-        }    
+        }   
+
+        // set base temperature that will be used on front panel (plus offset provided by user)
+        display_set_base_temperature(candidate_temperature);
         break;
     case HVAC_HEAT_AND_COOL:
         // force minimum hsyteresis
@@ -703,12 +710,12 @@ int update_current_setpoints(THERMOSTAT_STATE_T last_active, long int temperatur
         if (web.thermostat_temperature < (candidate_cooling_temperature - config.thermostat_hysteresis))
         {
             web.thermostat_set_point = candidate_heating_temperature + temporary_set_point_offsetx10;  
-            setpointtemperaturex10 = candidate_heating_temperature;        
+            display_set_base_temperature(candidate_heating_temperature);      
         }
         else
         {
             web.thermostat_set_point = candidate_cooling_temperature + temporary_set_point_offsetx10;
-            setpointtemperaturex10 = candidate_cooling_temperature;
+            display_set_base_temperature(candidate_cooling_temperature);
         }
 
         // set individual heating and cooling setpoints
@@ -716,6 +723,9 @@ int update_current_setpoints(THERMOSTAT_STATE_T last_active, long int temperatur
         web.thermostat_cooling_set_point = candidate_cooling_temperature + temporary_set_point_offsetx10;              
         break;
     case HVAC_HEATING_ONLY:
+        // user defined setpoint is for heating
+        candidate_heating_temperature = candidate_temperature;
+
         // set candidate cooling setpoint (not used in this mode but appears on web page)
         candidate_cooling_temperature = candidate_heating_temperature + 3*config.thermostat_hysteresis;
 
@@ -727,9 +737,12 @@ int update_current_setpoints(THERMOSTAT_STATE_T last_active, long int temperatur
         web.thermostat_set_point = candidate_heating_temperature + temporary_set_point_offsetx10;         
 
         // set base temperature that will be used on front panel (plus offset provided by user)
-        setpointtemperaturex10 = candidate_heating_temperature;         
+        display_set_base_temperature(candidate_heating_temperature);         
         break;
     case HVAC_COOLING_ONLY:
+        // user defined setpoint is for cooling
+        candidate_cooling_temperature = candidate_temperature;
+
         // set candidate heating setpoint (not used in this mode but appears on web page)    
         candidate_heating_temperature = candidate_cooling_temperature - 3*config.thermostat_hysteresis;
 
@@ -741,7 +754,7 @@ int update_current_setpoints(THERMOSTAT_STATE_T last_active, long int temperatur
         web.thermostat_set_point = candidate_cooling_temperature + temporary_set_point_offsetx10; 
 
         // set base temperature that will be used on front panel (plus offset provided by user)
-        setpointtemperaturex10 = candidate_cooling_temperature;        
+        display_set_base_temperature(candidate_cooling_temperature);        
         break;
     }
 
@@ -808,7 +821,7 @@ int update_current_setpoints(THERMOSTAT_STATE_T last_active, long int temperatur
         break;
     }
 
-    return(setpointtemperaturex10);
+    return(err);
 }
 
 int relay_gpio_enable(bool enable)
@@ -841,13 +854,16 @@ long int sanitize_setpoint(long int setpoint)
 
 bool temporary_setpoint_offset_changed(void)
 {
-    bool change = false;
     static int last_temporary_setpoint_offset = 0;
+    bool change = false;
+    int current_temporary_setpoint_offset = 0;
 
-    if (last_temporary_setpoint_offset != temporary_set_point_offsetx10)
+    current_temporary_setpoint_offset = display_get_setpoint_offset();
+
+    if (last_temporary_setpoint_offset != current_temporary_setpoint_offset)
     {
         change = true;
-        last_temporary_setpoint_offset = temporary_set_point_offsetx10;
+        last_temporary_setpoint_offset = current_temporary_setpoint_offset;
     }
 
     return(change);

@@ -48,8 +48,8 @@ extern NON_VOL_VARIABLES_T config;
 extern WEB_VARIABLES_T web;
 
 // global variables
-int hvac_state_change_log_index = 0;
-HVAC_STATE_CHANGE_LOG_T hvac_state_change_log[32];
+static int hvac_state_change_log_index = 0;
+static HVAC_STATE_CHANGE_LOG_T hvac_state_change_log[32];
 
 
 /*!

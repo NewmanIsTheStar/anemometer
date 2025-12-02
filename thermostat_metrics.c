@@ -124,9 +124,9 @@ extern WEB_VARIABLES_T web;
 extern NON_VOL_VARIABLES_T config;
 
 // gobal variables
-CLIMATE_HISTORY_T climate_history;
-CLIMATE_LAG_DATA_T climate_lag;
-CLIMATE_TREND_T climate_trend;
+static CLIMATE_HISTORY_T climate_history;
+static CLIMATE_LAG_DATA_T climate_lag;
+static CLIMATE_TREND_T climate_trend;
 
 
 /*!

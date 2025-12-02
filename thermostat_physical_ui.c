@@ -58,16 +58,17 @@ typedef enum
 // external variables
 extern NON_VOL_VARIABLES_T config;
 extern WEB_VARIABLES_T web;
-extern int setpointtemperaturex10;
-extern int temporary_set_point_offsetx10;
+
 
 // global variables
-THERMOSTAT_MODE_T front_panel_mode = HVAC_AUTO;
-TickType_t front_panel_mode_change_tick = 0;
-QueueHandle_t irq_queue = NULL;
-uint8_t passed_value;
-bool display_gpio_ok = false;
-bool button_gpio_ok = false;
+static THERMOSTAT_MODE_T front_panel_mode = HVAC_AUTO;
+static TickType_t front_panel_mode_change_tick = 0;
+static int front_panel_base_temperaturex10;
+static int display_setpoint_offset;
+static QueueHandle_t irq_queue = NULL;
+static uint8_t passed_value;
+static bool display_gpio_ok = false;
+static bool button_gpio_ok = false;
 
 /*!
  * \brief process button presses until inactivity timeout occurs
@@ -107,14 +108,14 @@ bool handle_button_press_with_timeout(TickType_t timeout)
 
             if (gpio_get(config.thermostat_increase_button_gpio) == false)
             {                
-                temporary_set_point_offsetx10+=10;
-                printf("INCREASE Button pressed. Setpoint offset = %d\n", temporary_set_point_offsetx10);                
+                display_setpoint_offset+=10;
+                printf("INCREASE Button pressed. Setpoint offset = %d\n", display_setpoint_offset);                
             }
 
             if (gpio_get(config.thermostat_decrease_button_gpio) == false)
             {                
-                temporary_set_point_offsetx10-=10;
-                printf("DECREASE Button pressed. Setpoint offset = %d\n", temporary_set_point_offsetx10);                
+                display_setpoint_offset-=10;
+                printf("DECREASE Button pressed. Setpoint offset = %d\n", display_setpoint_offset);                
             }
 
             if (gpio_get(config.thermostat_mode_button_gpio) == false)
@@ -128,8 +129,8 @@ bool handle_button_press_with_timeout(TickType_t timeout)
             }
 
             // update display
-            hvac_update_display(web.thermostat_temperature, front_panel_mode, setpointtemperaturex10 + temporary_set_point_offsetx10);
-            //printf("TEMP = %d SETPOINT = %d (%d + %d) MODE = %d\n", web.thermostat_temperature, setpointtemperaturex10 + temporary_set_point_offsetx10, setpointtemperaturex10, temporary_set_point_offsetx10, front_panel_mode);
+            hvac_update_display(web.thermostat_temperature, front_panel_mode, front_panel_base_temperaturex10 + display_setpoint_offset);
+            //printf("TEMP = %d SETPOINT = %d (%d + %d) MODE = %d\n", web.thermostat_temperature, setpointtemperaturex10 + display_setpoint_offset, setpointtemperaturex10, display_setpoint_offset, front_panel_mode);
 
             // deal with continual spurious interrupts or stuck button holding us in this loop forever
             if (--max_iterations <=0) break;
@@ -138,7 +139,7 @@ bool handle_button_press_with_timeout(TickType_t timeout)
     }
     else
     {
-        hvac_update_display(web.thermostat_temperature, front_panel_mode, setpointtemperaturex10 + temporary_set_point_offsetx10);
+        hvac_update_display(web.thermostat_temperature, front_panel_mode, front_panel_base_temperaturex10 + display_setpoint_offset);
         SLEEP_MS(1000);
     }
 
@@ -368,4 +369,26 @@ int display_brightness(int brightness)
     }
 
     return(err);
+}
+
+int display_set_base_temperature(int base_temperature)
+{
+    int err = 0;
+
+    // base setpoint defined by schedule that user may offset using front panel buttons
+    front_panel_base_temperaturex10 = base_temperature;
+
+    return(err);
+}
+
+int display_get_setpoint_offset(void)
+{
+    return(display_setpoint_offset);
+}
+
+int display_set_setpoint_offset(int new_offset)
+{
+    display_setpoint_offset = new_offset;
+
+    return(0);
 }

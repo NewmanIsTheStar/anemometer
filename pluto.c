@@ -269,19 +269,12 @@ void boss_task(__unused void *params)
 
         SLEEP_MS(1000);
 
-        // if (rtc_get_datetime(&date))
-        // {
-        //     // set day of week since ntp does not provide this TODO check if this is true and/or should be in sdk_callback.c        
-        //     date.dotw = get_day_of_week(date.month, date.day, date.year);
-
-        //     #ifndef FAKE_RTC
-        //     rtc_set_datetime(&date);
-        //     #endif
-        // }
-        // rtc_get_datetime(&date);
-        // datetime_to_str(buffer, sizeof(buffer), &date);
-        //printf("%s Zulu\n", buffer);
-
+        // request reboot if no sntp updates received for 24 hours
+        if (!sntp_alive())
+        {
+            printf("no sntp updates for 24 hours -- requesting reboot\n");
+            restart_requested = true;
+        }
 
         if (restart_requested)
         {

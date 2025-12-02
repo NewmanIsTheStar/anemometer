@@ -34,6 +34,7 @@ int mow_to_time_string(char *string, int length, int mow);
 int get_day_from_mow(int mow);
 int string_to_mow(char *string, int length);
 int time_string_to_mow(char *string, int length, int day);
+bool sntp_alive(void);
 
 #ifdef FAKE_RTC
 int8_t rtc_update(void);

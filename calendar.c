@@ -51,7 +51,8 @@ extern NON_VOL_VARIABLES_T config;
 
 // global variable
 char current_calendar_web_page[50] = "/landscape.shtml";
-uint32_t unix_time;
+uint32_t unix_time = 0;
+long int sntp_update_counter = 0;
 
 static int daylight_saving_start_month;
 static int daylight_saving_start_day;
@@ -833,6 +834,8 @@ int8_t rtc_set_datetime(uint32_t sec)
     
    unix_time = sec;
 
+   sntp_update_counter++;   // used to monitor sntp connectivity
+
    return(1);
 }
 
@@ -942,4 +945,28 @@ int time_string_to_mow(char *string, int length, int day)
    mow = day*24*60 + hour*60 + minute;
 
    return(mow);
+}
+
+/*!
+ * \brief check sntp is receiving updates
+ *
+ */
+bool sntp_alive(void)
+{
+   bool alive = true;
+   static long int poll_counter = 0;
+   static long int last_sntp_update_counter= 0;
+   
+   if (sntp_update_counter != last_sntp_update_counter)
+   {
+      // an sntp update has occured since the last poll so reset counter
+      poll_counter = 0;
+      last_sntp_update_counter = sntp_update_counter;
+   }
+   else if (poll_counter > 60*60*24)
+   {
+      alive = false;
+   }
+
+   return(alive);
 }

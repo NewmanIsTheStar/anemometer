@@ -584,6 +584,8 @@ int update_current_setpoints(THERMOSTAT_STATE_T last_active, long int temperatur
     long int candidate_heating_temperature = 0;
     long int candidate_cooling_temperature = 0;
     THERMOSTAT_MODE_T candidate_mode = HVAC_AUTO;
+    THERMOSTAT_MODE_T front_panel_mode = HVAC_AUTO;    
+    THERMOSTAT_MODE_T effective_mode = HVAC_AUTO;
     int candidate_delta = 0;
     static bool cooling_disabled = false;
     static bool heating_disabled = false;
@@ -632,12 +634,27 @@ int update_current_setpoints(THERMOSTAT_STATE_T last_active, long int temperatur
     candidate_heating_temperature = sanitize_setpoint(candidate_heating_temperature);
     candidate_cooling_temperature = sanitize_setpoint(candidate_cooling_temperature);
 
-    if (scheduled_mode != HVAC_HEAT_AND_COOL)
+    // determine effective mode
+    front_panel_mode = get_front_panel_mode();
+    if (front_panel_mode == HVAC_AUTO)
     {
+        effective_mode = candidate_mode;
+    }
+    else
+    {
+        effective_mode = front_panel_mode;
+    }
+
+    switch(effective_mode)
+    {    
+    case HVAC_AUTO:
+    case HVAC_OFF:  
+    case HVAC_FAN_ONLY:
+    default: 
         // initial set points are identical
-        web.thermostat_set_point = setpointtemperaturex10 + temporary_set_point_offsetx10;
-        web.thermostat_heating_set_point = setpointtemperaturex10 + temporary_set_point_offsetx10;
-        web.thermostat_cooling_set_point = setpointtemperaturex10 + temporary_set_point_offsetx10;
+        web.thermostat_set_point = candidate_temperature + temporary_set_point_offsetx10;
+        web.thermostat_heating_set_point = candidate_temperature + temporary_set_point_offsetx10;
+        web.thermostat_cooling_set_point = candidate_temperature + temporary_set_point_offsetx10;
 
         // adjust setpoint bias based on last heating or cooling cycle run
         switch(last_active)
@@ -669,13 +686,12 @@ int update_current_setpoints(THERMOSTAT_STATE_T last_active, long int temperatur
             }
             else
             {
-                web.thermostat_heating_set_point -= (3*config.thermostat_hysteresis);         
+                web.thermostat_heating_set_point -= (3*config.thermostat_hysteresis);       
             }
             break;    
-        }
-    }
-    else  // HVAC_HEAT_AND_COOL
-    {
+        }    
+        break;
+    case HVAC_HEAT_AND_COOL:
         // force minimum hsyteresis
         if ((candidate_heating_temperature >= candidate_cooling_temperature) ||
             (abs(candidate_cooling_temperature - candidate_heating_temperature) < (3*config.thermostat_hysteresis)))
@@ -683,7 +699,7 @@ int update_current_setpoints(THERMOSTAT_STATE_T last_active, long int temperatur
             candidate_heating_temperature = candidate_cooling_temperature - 3*config.thermostat_hysteresis;
         }
 
-        // select default setpoint based on current temperature (non-functional in this mode but appears on status web page)
+        // set auto setpoint based on current temperature (non-functional in this mode but appears on status web page)
         if (web.thermostat_temperature < (candidate_cooling_temperature - config.thermostat_hysteresis))
         {
             web.thermostat_set_point = candidate_heating_temperature + temporary_set_point_offsetx10;  
@@ -694,9 +710,39 @@ int update_current_setpoints(THERMOSTAT_STATE_T last_active, long int temperatur
             web.thermostat_set_point = candidate_cooling_temperature + temporary_set_point_offsetx10;
             setpointtemperaturex10 = candidate_cooling_temperature;
         }
-                
+
+        // set individual heating and cooling setpoints
         web.thermostat_heating_set_point = candidate_heating_temperature + temporary_set_point_offsetx10;
-        web.thermostat_cooling_set_point = candidate_cooling_temperature + temporary_set_point_offsetx10;        
+        web.thermostat_cooling_set_point = candidate_cooling_temperature + temporary_set_point_offsetx10;              
+        break;
+    case HVAC_HEATING_ONLY:
+        // set candidate cooling setpoint (not used in this mode but appears on web page)
+        candidate_cooling_temperature = candidate_heating_temperature + 3*config.thermostat_hysteresis;
+
+        // set individual heating and cooling setpoints
+        web.thermostat_heating_set_point = candidate_heating_temperature + temporary_set_point_offsetx10;
+        web.thermostat_cooling_set_point = candidate_cooling_temperature + temporary_set_point_offsetx10; 
+        
+        // set auto setpoint
+        web.thermostat_set_point = candidate_heating_temperature + temporary_set_point_offsetx10;         
+
+        // set base temperature that will be used on front panel (plus offset provided by user)
+        setpointtemperaturex10 = candidate_heating_temperature;         
+        break;
+    case HVAC_COOLING_ONLY:
+        // set candidate heating setpoint (not used in this mode but appears on web page)    
+        candidate_heating_temperature = candidate_cooling_temperature - 3*config.thermostat_hysteresis;
+
+        // set individual heating and cooling setpoints        
+        web.thermostat_heating_set_point = candidate_heating_temperature + temporary_set_point_offsetx10;
+        web.thermostat_cooling_set_point = candidate_cooling_temperature + temporary_set_point_offsetx10;    
+
+        // set auto setpoint
+        web.thermostat_set_point = candidate_cooling_temperature + temporary_set_point_offsetx10; 
+
+        // set base temperature that will be used on front panel (plus offset provided by user)
+        setpointtemperaturex10 = candidate_cooling_temperature;        
+        break;
     }
 
     // adjust setpoint according to powerwall status
@@ -713,12 +759,14 @@ int update_current_setpoints(THERMOSTAT_STATE_T last_active, long int temperatur
         CLIP(config.grid_down_cooling_enable_battery_level,  350, 1000);  // 35% - 100%
         CLIP(config.grid_down_heating_enable_battery_level,  350, 1000);  // 35% - 100%
 
-        if (config.grid_down_cooling_disable_battery_level >= config.grid_down_cooling_enable_battery_level)
+        // ensure 5% hysteresis for cooling enable/disable
+        if ((config.grid_down_cooling_disable_battery_level + 50) >= config.grid_down_cooling_enable_battery_level)
         {
             config.grid_down_cooling_disable_battery_level = config.grid_down_cooling_enable_battery_level - 50;
         }
 
-        if (config.grid_down_heating_disable_battery_level >= config.grid_down_heating_enable_battery_level)
+        // ensure 5% hysteresis for heating enable/disable
+        if ((config.grid_down_heating_disable_battery_level + 50) >= config.grid_down_heating_enable_battery_level)
         {
             config.grid_down_heating_disable_battery_level = config.grid_down_heating_enable_battery_level - 50;
         }        

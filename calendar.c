@@ -777,7 +777,6 @@ int8_t rtc_update(void)
    static TickType_t last_tick = 0;
    static bool initialized = false;   
 
-
    current_tick = xTaskGetTickCount();
 
    if(!initialized)
@@ -785,11 +784,13 @@ int8_t rtc_update(void)
       last_tick = current_tick;
       initialized = true;
    }
+   else
+   {
+      increment = (current_tick - last_tick)/1000;
 
-   increment = (current_tick - last_tick)/1000;
-
-   last_tick += increment*1000;   // avoid accumulating rounding errors
-   unix_time += increment;  // TODO make atomic
+      last_tick += increment*1000;   // avoid accumulating rounding errors
+      unix_time += increment;        // must be atomic!
+   }
 
    return(0);
 }
@@ -831,8 +832,8 @@ int8_t rtc_get_datetime(datetime_t *date)
  */
 int8_t rtc_set_datetime(uint32_t sec)
 {
-    
-   unix_time = sec;
+   // TODO: prevent time from going backwards -- instead reduce rtc_update increment size to slow time    
+   unix_time = sec;         // must be atomic!
 
    sntp_update_counter++;   // used to monitor sntp connectivity
 
@@ -959,6 +960,7 @@ bool sntp_alive(void)
    
    if (sntp_update_counter != last_sntp_update_counter)
    {
+      printf("sntp updates: %d @ poll number %d\n", sntp_update_counter, poll_counter);
       // an sntp update has occured since the last poll so reset counter
       poll_counter = 0;
       last_sntp_update_counter = sntp_update_counter;

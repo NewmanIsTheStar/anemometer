@@ -168,6 +168,7 @@ void boss_task(__unused void *params)
     ip_addr_t nm = {0};
     ip_addr_t gw = {0};
     BaseType_t task_creation_status = 0;
+    uint32_t clock_ahead_error = 0;
     
     // start watchdog
     xTaskCreate(watchdog_task, "Watchdog Task", configMINIMAL_STACK_SIZE, NULL, WATCHDOG_TASK_PRIORITY, NULL);
@@ -261,7 +262,12 @@ void boss_task(__unused void *params)
 
         #ifdef FAKE_RTC
         // maintain fake rtc
-        rtc_update();
+        clock_ahead_error = rtc_update();
+
+        if (clock_ahead_error)
+        {
+            send_syslog_message("clock", "Clock shaving in progress.  Local clock ahead of UTC by %lu ms", clock_ahead_error);
+        }
         #endif
 
         // report watchdog reboot to syslog server
@@ -525,7 +531,7 @@ int monitor_stacks(void)
         {
             if (!spam_throttle)
             {
-                send_syslog_message("usurper", "LOW STACK WARNING.  %s stack high water mark = %d", worker_tasks[worker].name, worker_tasks[worker].stack_high_water_mark);
+                send_syslog_message("stack", "LOW STACK WARNING.  %s stack high water mark = %d", worker_tasks[worker].name, worker_tasks[worker].stack_high_water_mark);
                 spam_throttle = 60;
             }
             else

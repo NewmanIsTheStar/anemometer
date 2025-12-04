@@ -205,7 +205,7 @@ int accumlate_metrics(uint32_t unix_time, long int temperaturex10, long int humi
     new_sample.humidityx10 = humidityx10;
 
     // remove noise from the temperature
-    new_sample.temperaturex10 = filter_temperature_noise(new_sample.temperaturex10);
+    //new_sample.temperaturex10 = filter_temperature_noise(new_sample.temperaturex10);
 
     // add new temperature and humidity to trend buffer
     update_trend_buffer(&new_sample, &previous_sample);
@@ -606,18 +606,18 @@ int smooth_temperature_history(void)
     bool delta_1_positive = false;
     bool delta_2_positive = false;
     bool delta_3_positive = false;
-    long int temp_0 = 0;
     long int temp_1 = 0;
     long int temp_2 = 0;
-    long int smoothed_temperature = 0;
+    long int temp_3 = 0;
+    long int smoothed_penultimate_temperature = 0;
  
-    // filter out unrealistic small reverses in temperature trend
+    // filter out unrealistic short reversals in temperature trend that last one sample
     if (climate_trend.buffer_population >= 3)
     {
         // get temperature delta values for last three samples
-        delta_1 = climate_trend.delta_buffer[get_climate_trend_buffer_index(1)].temperaturex10;
-        delta_2 = climate_trend.delta_buffer[get_climate_trend_buffer_index(2)].temperaturex10;
-        delta_3 = climate_trend.delta_buffer[get_climate_trend_buffer_index(3)].temperaturex10; 
+        delta_1 = climate_trend.delta_buffer[get_climate_trend_buffer_index(1)].temperaturex10;  // ultimate
+        delta_2 = climate_trend.delta_buffer[get_climate_trend_buffer_index(2)].temperaturex10;  // penultimate
+        delta_3 = climate_trend.delta_buffer[get_climate_trend_buffer_index(3)].temperaturex10;  // antepenultimate
 
         // determine if delta was positive or negative for past three samples
         delta_1_positive = delta_1>0?true:false;
@@ -627,16 +627,18 @@ int smooth_temperature_history(void)
         // check if delta reversed direction for one sample -- we want to filter this out
         if (((delta_3 == 0) || (delta_3_positive == delta_1_positive)) && ((delta_2 != 0) && (delta_1 != 0) && (delta_2_positive != delta_1_positive)))
         {
-            // delta reversed for one sample replace middle sample to form straight line
-            temp_0 = climate_history.buffer[get_climate_history_buffer_index(1)].temperaturex10;
-            temp_1 = climate_history.buffer[get_climate_history_buffer_index(2)].temperaturex10;
-            temp_2 = climate_history.buffer[get_climate_history_buffer_index(3)].temperaturex10;
+            // delta reversed for one sample so replace penultimate sample to form straight line
+            temp_1 = climate_history.buffer[get_climate_history_buffer_index(1)].temperaturex10;
+            temp_2 = climate_history.buffer[get_climate_history_buffer_index(2)].temperaturex10;
+            temp_3 = climate_history.buffer[get_climate_history_buffer_index(3)].temperaturex10;
 
-            smoothed_temperature = (temp_0 + temp_2)/2;
+            // average ultimate and antepenultimate temperatures
+            smoothed_penultimate_temperature = (temp_1 + temp_3)/2;  
 
-            printf("smoothing temperature.  Original sequence = %ld, %ld, %ld.  New sequence = %ld, %ld, %ld\n", temp_2, temp_1, temp_0, temp_2, smoothed_temperature, temp_0);
+            printf("smoothing penultimate temperature.  Original sequence = %ld, %ld, %ld.  New sequence = %ld, %ld, %ld\n", temp_3, temp_2, temp_1, temp_3, smoothed_penultimate_temperature, temp_1);
 
-            climate_history.buffer[get_climate_history_buffer_index(2)].temperaturex10 = (climate_history.buffer[get_climate_history_buffer_index(3)].temperaturex10 + climate_history.buffer[get_climate_history_buffer_index(1)].temperaturex10)/2;            
+            // overwrite penultimate sample with smoothed version
+            climate_history.buffer[get_climate_history_buffer_index(2)].temperaturex10 = smoothed_penultimate_temperature;            
         }
     }
 

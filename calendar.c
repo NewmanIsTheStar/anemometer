@@ -771,7 +771,7 @@ int8_t get_real_time_clock_seconds(void)
  *
  * This should only be called from one task!
  */
-int8_t rtc_update(void)
+uint32_t rtc_update(void)
 {
    TickType_t current_tick;
    TickType_t increment;
@@ -814,7 +814,7 @@ int8_t rtc_update(void)
       unix_time += increment;        // must be atomic!
    }
 
-   return(0);
+   return(unix_time_delta_in_ticks);
 }
 
 /*!

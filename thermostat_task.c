@@ -143,7 +143,8 @@ void thermostat_task(void *params)
                 track_hvac_extrema(HEATING_LAG, temperaturex10);                 
 
                 // update web ui
-                web.thermostat_temperature = filter_temperature_noise(temperaturex10);
+                //web.thermostat_temperature = filter_temperature_noise(temperaturex10);
+                web.thermostat_temperature = temperaturex10;
             }
             
             // check powerwall status

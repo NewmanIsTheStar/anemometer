@@ -37,7 +37,7 @@ int time_string_to_mow(char *string, int length, int day);
 bool sntp_alive(void);
 
 #ifdef FAKE_RTC
-int8_t rtc_update(void);
+uint32_t rtc_update(void);
 int8_t rtc_get_datetime(datetime_t *date);
 int8_t rtc_set_datetime(uint32_t sec);
 #endif

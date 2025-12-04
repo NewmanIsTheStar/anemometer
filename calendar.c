@@ -52,6 +52,7 @@ extern NON_VOL_VARIABLES_T config;
 // global variable
 char current_calendar_web_page[50] = "/landscape.shtml";
 uint32_t unix_time = 0;
+uint32_t unix_time_delta_in_ticks = 0;
 long int sntp_update_counter = 0;
 
 static int daylight_saving_start_month;
@@ -786,8 +787,29 @@ int8_t rtc_update(void)
    }
    else
    {
-      increment = (current_tick - last_tick)/1000;
+      increment = (current_tick - last_tick);
 
+      // check if clock shaving required
+      if (unix_time_delta_in_ticks)
+      {
+         if (increment > 200)
+         {
+            if (unix_time_delta_in_ticks > 100)
+            {
+               // shave 100 ms
+               increment -= 100;  
+               unix_time_delta_in_ticks -= 100;
+            } 
+            else if (unix_time_delta_in_ticks > 0)
+            {
+               // shave remaining ms
+               increment -= unix_time_delta_in_ticks;  
+               unix_time_delta_in_ticks = 0;            
+            }    
+         }
+      }
+           
+      increment /= 1000;
       last_tick += increment*1000;   // avoid accumulating rounding errors
       unix_time += increment;        // must be atomic!
    }
@@ -832,8 +854,23 @@ int8_t rtc_get_datetime(datetime_t *date)
  */
 int8_t rtc_set_datetime(uint32_t sec)
 {
-   // TODO: prevent time from going backwards -- instead reduce rtc_update increment size to slow time    
-   unix_time = sec;         // must be atomic!
+   // try to prevent time going backwards   
+   if (sec >= unix_time)
+   {
+      unix_time = sec; // must be atomic!
+   }
+   else
+   {
+      // our local time is ahead of ntp so record delta in ticks
+      unix_time_delta_in_ticks = (unix_time - sec) *1000;
+
+      // if delta is huge a step change is necessary
+      if (unix_time_delta_in_ticks > 60000)
+      {
+         unix_time = sec; // time goes backwards!
+         unix_time_delta_in_ticks = 0;
+      }
+   }
 
    sntp_update_counter++;   // used to monitor sntp connectivity
 

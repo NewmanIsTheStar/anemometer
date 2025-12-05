@@ -386,14 +386,17 @@ void track_hvac_extrema(CLIMATE_LAG_T lag_type, long int temperaturex10)
             if (temperaturex10 > climate_lag.extrema_temperature[lag_type])
             {
                 climate_lag.extrema_delay[lag_type] = xTaskGetTickCount() - climate_lag.hvac_off_tick[lag_type];
-                climate_lag.extrema_temperature[lag_type] =  temperaturex10 - climate_lag.hvac_off_temperature[lag_type];
+                //climate_lag.extrema_temperature[lag_type] =  temperaturex10 - climate_lag.hvac_off_temperature[lag_type];
+                climate_lag.extrema_temperature[lag_type] =  temperaturex10;                
+
             }
             break;
         case COOLING_LAG:
             if (temperaturex10 < climate_lag.extrema_temperature[lag_type])
             {
                 climate_lag.extrema_delay[lag_type] = xTaskGetTickCount() - climate_lag.hvac_off_tick[lag_type];
-                climate_lag.extrema_temperature[lag_type] =  temperaturex10 - climate_lag.hvac_off_temperature[lag_type];
+                //climate_lag.extrema_temperature[lag_type] =  temperaturex10 - climate_lag.hvac_off_temperature[lag_type];
+                climate_lag.extrema_temperature[lag_type] =  temperaturex10;
             }    
             break;
         default:
@@ -413,7 +416,7 @@ void set_hvac_lag(CLIMATE_LAG_T lag_type)
     if (climate_lag.measurement_in_progress[lag_type])
     {
         climate_lag.lag_delay[lag_type] = climate_lag.extrema_delay[lag_type];
-        climate_lag.lag_temperature_delta[lag_type] =  climate_lag.extrema_temperature[lag_type]; 
+        climate_lag.lag_temperature_delta[lag_type] =  climate_lag.extrema_temperature[lag_type] - climate_lag.hvac_off_temperature[lag_type]; 
         climate_lag.measurement_in_progress[lag_type] = false;
 
         send_syslog_message("lag", "Type = %s Time Lag = %ld ms Temperature Lag = %c%ld.%ld degrees\n", lag_type?"Heating":"Cooling", climate_lag.lag_delay[lag_type], climate_lag.lag_temperature_delta[lag_type]<0?'-':' ', abs(climate_lag.lag_temperature_delta[lag_type]/10), abs(climate_lag.lag_temperature_delta[lag_type]%10));        

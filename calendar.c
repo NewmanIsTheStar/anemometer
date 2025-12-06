@@ -446,8 +446,9 @@ int get_timestamp(char *timestamp, int len, int isoformat, int localtime)
 
    if (ok)
    {
-      if (config.timezone_offset == 0) 
+      if ((!localtime || config.timezone_offset == 0)) 
       {
+         // zulu time
          if (isoformat)
          {
             sprintf(timezone_offset, "Z");

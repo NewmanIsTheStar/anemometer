@@ -44,9 +44,10 @@
 #include "pluto.h"
 #include "tm1637.h"
 
-// chews up a lot of RAM
-#define SIZE_CLIMATE_HISTORY (100)
+// defines
+#define SIZE_CLIMATE_HISTORY (100)          
 #define SIZE_TREND_WINDOW (10)
+#define LAG_MIN_REPORTABLE_TEMP_DELTA (2) 
 
 typedef enum
 {
@@ -63,13 +64,6 @@ typedef enum
     SMALL_DELTA   = 2,
     NUM_DELTAS     = 3    
 } CLIMATE_DELTA_CATAGORY_T;
-
-// typedef struct
-// {
-//     time_t unix_time;
-//     long int temperaturex10;
-//     long int humidityx10;
-// } CLIMATE_DATAPOINT_T;
 
 typedef struct
 {
@@ -191,9 +185,7 @@ int initialize_climate_metrics(void)
  * 
  * \return 0
  */
-    ;   // TODO: should be using time_t
-    ;
-    ;
+// TODO: should be using time_t
 int accumlate_metrics(uint32_t unix_time, long int temperaturex10, long int humidityx10)
 {
     static CLIMATE_DATAPOINT_T previous_sample = {0,0,0};
@@ -405,7 +397,6 @@ void track_hvac_extrema(CLIMATE_LAG_T lag_type, long int temperaturex10)
     }
 }
 
-
 /*!
  * \brief Set lag based on tracked extrema
  * 
@@ -419,10 +410,11 @@ void set_hvac_lag(CLIMATE_LAG_T lag_type)
         climate_lag.lag_temperature_delta[lag_type] =  climate_lag.extrema_temperature[lag_type] - climate_lag.hvac_off_temperature[lag_type]; 
         climate_lag.measurement_in_progress[lag_type] = false;
 
-        send_syslog_message("lag", "Type = %s Time Lag = %ld ms Temperature Lag = %c%ld.%ld degrees\n", lag_type?"Heating":"Cooling", climate_lag.lag_delay[lag_type], climate_lag.lag_temperature_delta[lag_type]<0?'-':' ', abs(climate_lag.lag_temperature_delta[lag_type]/10), abs(climate_lag.lag_temperature_delta[lag_type]%10));        
-        // add sanity check / constraints
-
-        //printf("LAG LAST CYCLE:  Extrema occured %lu ms after HVAC shut off and temperature change was %ld\n", climate_lag.lag_delay[lag_type], climate_lag.lag_temperature_delta[lag_type]);
+        // report lag if temperature trend continued for more than 0.2 degrees after HVAC shutoff
+        if (abs(climate_lag.lag_temperature_delta[lag_type]) > LAG_MIN_REPORTABLE_TEMP_DELTA)
+        {
+            send_syslog_message("lag", "Type = %s Time Lag = %ld ms Temperature Lag = %c%ld.%ld degrees\n", lag_type?"Heating":"Cooling", climate_lag.lag_delay[lag_type], climate_lag.lag_temperature_delta[lag_type]<0?'-':' ', abs(climate_lag.lag_temperature_delta[lag_type]/10), abs(climate_lag.lag_temperature_delta[lag_type]%10));        
+        }
     }
 }
 
@@ -455,10 +447,11 @@ void log_climate_change(int temperaturex10, int humidityx10)
 /*!
  * \brief print temperature history for insertion into web page  
  *
- * \param[in]   log_name      name of log file on server
- * \param[in]   format, ...   variable parameters printf style  
- * 
- * \return num bytes sent or -1 on error
+ * \param[out]  buffer           pointer to output buffer
+ * \param[in]   length           size of output buffer  
+ * \param[in]   start_position   offset into buffer to place output
+ * \param[in]   num_data_points  max number of (time, temperature) pairs to output  
+ * \return number of bytes printed
  */
 int print_temperature_history(char *buffer, int length, int start_position, int num_data_points)
 {
@@ -469,21 +462,14 @@ int print_temperature_history(char *buffer, int length, int start_position, int 
     char iso_timestamp[32];
     char *buff = 0;
 
+    // output xy data in format expected by javascript e.g. { x: '2025-10-01T08:00:00', y: 65 },
     buff = buffer;
     *buffer = 0;
 
     if (start_position < climate_history.buffer_population)
     {
-        // output xy data in format expected by javascript
-        // { x: '2025-10-01T08:00:00', y: 65 },
-        //for(i=(start_position+1; (i<climate_history.buffer_population) && (i<(start_position+num_data_points)); i++)
-
         // limit data points to number in the circular buffer
-        if (start_position > climate_history.buffer_population)
-        {
-            num_data_points = 0;
-        }
-        else if ((start_position + num_data_points) > climate_history.buffer_population)
+        if ((start_position + num_data_points) > climate_history.buffer_population)
         {
             num_data_points = climate_history.buffer_population - start_position;
         }
@@ -527,12 +513,8 @@ int print_temperature_history(char *buffer, int length, int start_position, int 
             }
         }
     }
-    // printf("At exit strlen = %d and total_printed = %d\n", strlen(buff), total_printed_characters);
-    // printf("FINAL BUFFER =\n%s\n", buff);
 
-    //total_printed_characters = snprintf(buffer, length, "MONKEY%d\n", start_position);
 
-    //printf("Minimum heap = %d\n", xPortGetMinimumEverFreeHeapSize());
 
     return(total_printed_characters);
 }

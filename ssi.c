@@ -781,7 +781,7 @@ u16_t ssi_handler(int iIndex, char *pcInsert, int iInsertLen)
         break;        
         case SSI_time: // time
         {
-            if(!get_timestamp(timestamp, sizeof(timestamp), false)) {
+            if(!get_timestamp(timestamp, sizeof(timestamp), false, false)) {
                 printed = snprintf(pcInsert, iInsertLen, "%s", timestamp);
             }
             else {

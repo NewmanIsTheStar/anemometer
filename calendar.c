@@ -423,28 +423,38 @@ int daylight_savings_active(datetime_t date)
  * \param[out]  timestamp   pointer to string to store the timestamp 
  * \param[in]   len         max length of timestamp string  
  * \param[in]   isoformat   use iso format
+ * \param[in]   localtime   use local time
  * 
  * \return 0 on success, non-zero on error
  */
-int get_timestamp(char *timestamp, int len, int isoformat)
+int get_timestamp(char *timestamp, int len, int isoformat, int localtime)
 {
-    int ok = 0;
-    datetime_t t;
+   int ok = 0;
+   datetime_t t;
 
-    ok = rtc_get_datetime(&t);
+#ifdef FAKE_RTC
+   if (localtime)
+   {
+      ok = get_datetime(&t, localtime);
+   }
+   else
+#endif
+   {
+      ok = rtc_get_datetime(&t);
+   }
 
-    if (ok)
-    {
-        if (isoformat)
-        {
-            // iso format needed for syslog
-            snprintf(timestamp, len, "%04d-%02d-%02dT%02d:%02d:%02d.000Z", t.year, t.month, t.day, t.hour, t.min, t.sec);
-        }
-        else
-        {
-            // human readable format
-            snprintf(timestamp, len, "%04d-%02d-%02d %02d:%02d:%02d Z", t.year, t.month, t.day, t.hour, t.min, t.sec);
-        }
+   if (ok)
+   {
+      if (isoformat)
+      {
+         // iso format needed for syslog
+         snprintf(timestamp, len, "%04d-%02d-%02dT%02d:%02d:%02d.000Z", t.year, t.month, t.day, t.hour, t.min, t.sec);
+      }
+      else
+      {
+        // human readable format
+        snprintf(timestamp, len, "%04d-%02d-%02d %02d:%02d:%02d Z", t.year, t.month, t.day, t.hour, t.min, t.sec);
+      }
     }
     else
     {
@@ -1008,4 +1018,37 @@ bool sntp_alive(void)
    }
 
    return(alive);
+}
+
+/*!
+ * \brief Get current time
+ *  
+ * \return 1
+ */
+int8_t get_datetime(datetime_t *date, int localtime)
+{
+   struct tm * timeinfo;
+   time_t t;
+
+   t = unix_time; // must be atomic
+
+   if (localtime)
+   {
+      // apply timezone offset
+      t += (config.timezone_offset * 60);
+   }
+
+	timeinfo = gmtime(&t);
+
+	memset(date, 0, sizeof(datetime_t));
+	date->sec = timeinfo->tm_sec;
+	date->min = timeinfo->tm_min;
+	date->hour = timeinfo->tm_hour;
+	date->day = timeinfo->tm_mday;
+	date->month = timeinfo->tm_mon + 1;
+	date->year = timeinfo->tm_year + 1900;
+
+   date->dotw = get_day_of_week(date->month, date->day, date->year);
+
+   return(1);
 }

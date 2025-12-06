@@ -25,11 +25,11 @@ Upon completion of a successful build the file thermostat.uf2 should be created.
 
 ## Hardware
 - Raspberry Pi Pico2 W
-- Raspberry Pi Pico Relay Board (with at least 3 realys)
+- Raspberry Pi Pico Relay Board (with at least 3 relays)
 - AHT10 temperature sensor
 - Optional Hardware for control from front panel
-  - Seven Segment Display (4 digit and 6 digit displays supported)
-  - Push buttons (3) for up, down and mode setting
+  - Seven Segment Display (4 digit or 6 digit)
+  - Momentary Push buttons (3)
 
 ## Licenses
 - SPDX-License-Identifier: BSD-3-Clause

@@ -256,7 +256,7 @@ int check_watchdog_reboot(void)
         // cache watchdog reset status
         watchdog_reset = watchdog_caused_reboot();
     }
-
+    
     if (watchdog_reset && !web_page_updated)
     {
         // update web page

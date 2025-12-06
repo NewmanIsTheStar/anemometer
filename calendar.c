@@ -431,29 +431,46 @@ int get_timestamp(char *timestamp, int len, int isoformat, int localtime)
 {
    int ok = 0;
    datetime_t t;
+   char timezone_offset[12];
 
 #ifdef FAKE_RTC
    if (localtime)
    {
-      ok = get_datetime(&t, localtime);
+      ok = get_datetime(&t, localtime);      
    }
    else
 #endif
    {
-      ok = rtc_get_datetime(&t);
+      ok = rtc_get_datetime(&t);      
    }
 
    if (ok)
    {
+      if (config.timezone_offset == 0) 
+      {
+         if (isoformat)
+         {
+            sprintf(timezone_offset, "Z");
+         }
+         else
+         {
+            sprintf(timezone_offset, "");
+         }
+      }
+      else
+      {
+         sprintf(timezone_offset, "%c%02d:%02d", config.timezone_offset<0?'-':'+', abs(config.timezone_offset/60), abs(config.timezone_offset%60));
+      }
+
       if (isoformat)
       {
          // iso format needed for syslog
-         snprintf(timestamp, len, "%04d-%02d-%02dT%02d:%02d:%02d.000Z", t.year, t.month, t.day, t.hour, t.min, t.sec);
+         snprintf(timestamp, len, "%04d-%02d-%02dT%02d:%02d:%02d.000%s", t.year, t.month, t.day, t.hour, t.min, t.sec, timezone_offset);
       }
       else
       {
         // human readable format
-        snprintf(timestamp, len, "%04d-%02d-%02d %02d:%02d:%02d Z", t.year, t.month, t.day, t.hour, t.min, t.sec);
+        snprintf(timestamp, len, "%04d-%02d-%02d %02d:%02d:%02d UTC%s", t.year, t.month, t.day, t.hour, t.min, t.sec, timezone_offset);
       }
     }
     else

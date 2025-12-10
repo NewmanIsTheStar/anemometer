@@ -103,6 +103,10 @@ void watchdog_task(void *params)
         {
             watchdog_update();
         }
+        else
+        {
+            application_restart(REBOOT_WATCHDOG);
+        }
 #endif
         SLEEP_MS(1000);
     }

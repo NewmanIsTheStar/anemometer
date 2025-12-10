@@ -37,6 +37,8 @@
 
 #define FLASH_TARGET_OFFSET (PICO_FLASH_SIZE_BYTES - FLASH_SECTOR_SIZE)
 
+//extern REBOOT_REASON_T reboot_reason;
+
 //prototype
 //void establish_socket_dns_found(const char* hostname, const ip_addr_t *ipaddr, void *arg);
 int get_socket(char *address_string, int port, int type);
@@ -267,7 +269,7 @@ int check_watchdog_reboot(void)
     if (watchdog_reset && config.syslog_enable && !syslog_sent)
     {
         // log watchdog event
-        if ((send_syslog_message("usurper", "REBOOT @ %s", web.watchdog_timestring)) > 0)   //currently using watchdog to initiate all reboots, so misleading to mention watchdog in message
+        if ((send_syslog_message("usurper", "REBOOT @ %s [reason = %lu]", web.watchdog_timestring, get_reboot_reason())) > 0)   
         {
             syslog_sent = true;
         }

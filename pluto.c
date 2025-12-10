@@ -59,6 +59,8 @@
 #define PAUSE_FOR_INITIAL_SNTP_RESPONSE (1)
 //#define LOG_CLOCK_SLEW                  (1) 
 
+// uninitialized variable
+REBOOT_REASON_T __uninitialized_ram(reboot_reason);
 
 // external variables
 extern NON_VOL_VARIABLES_T config;
@@ -122,6 +124,23 @@ int pluto(void)
     if (watchdog_caused_reboot())
     {
         printf("***Reboot occured***\n");
+
+        switch(reboot_reason)
+        {
+        default:
+        case REBOOT_UNKNOWN:
+            printf("Reboot for Unknown reason\n");
+            break;
+        case REBOOT_SNTP_FAILURE:
+            printf("Reboot due to SNTP failure\n");
+            break;
+        case REBOOT_WEATHER_FAILURE:
+            printf("Reboot due to weather failure\n");
+            break;
+        case REBOOT_USER_REQUEST:
+            printf("Reboot due to user request\n");
+            break;
+        }
     }
     
 #if ( portSUPPORT_SMP == 1 )
@@ -291,7 +310,7 @@ void boss_task(__unused void *params)
         if (!sntp_alive())
         {
             printf("no sntp updates for 24 hours -- requesting reboot\n");
-            restart_requested = true;
+            application_restart(REBOOT_SNTP_FAILURE);
         }
 
         // reboot if requested
@@ -304,8 +323,11 @@ void boss_task(__unused void *params)
             cyw43_arch_disable_sta_mode();
             cyw43_arch_deinit();
             
-            // flush recent config changes to flash prior to reboot with one retry
-            if (config_write()) config_write();
+            if (reboot_reason == REBOOT_USER_REQUEST)
+            {
+                // flush recent config changes to flash prior to reboot with one retry
+                if (config_write()) config_write();
+            }
 
             printf("***REBOOT in 100 ms***\n");
             watchdog_enable(100, 0);
@@ -323,9 +345,10 @@ void boss_task(__unused void *params)
  *
  * \return nothing
  */
-int application_restart(void)
+int application_restart(REBOOT_REASON_T reason)
 {
     restart_requested = true;
+    reboot_reason = reason;
 
     return(0);
 }
@@ -889,4 +912,9 @@ void unix_to_iso8601(time_t unix_timestamp, char *iso_string, size_t buffer_size
     // Format the broken-down time into an ISO 8601 string
     // Example format: YYYY-MM-DDTHH:mm:ssZ
     strftime(iso_string, buffer_size, "%Y-%m-%dT%H:%M:%SZ", timeinfo);
+}
+
+uint32_t get_reboot_reason(void)
+{
+    return(reboot_reason);
 }

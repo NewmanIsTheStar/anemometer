@@ -846,17 +846,10 @@ const char * cgi_led_handler(int iIndex, int iNumParams, char *pcParam[], char *
  */
 const char * cgi_reboot_handler(int iIndex, int iNumParams, char *pcParam[], char *pcValue[])
 {
-    //int i = 0;
-    //int whole_part = 0;
-    //int tenths_part = 0;
-    //char *param = NULL;
-    //char *value = NULL;
-    //int new_value = 0;
-       
     printf("REBOOT requested\n");
     
     //request reboot
-    application_restart();
+    application_restart(REBOOT_USER_REQUEST);
 
     return "/index.shtml";    
 }

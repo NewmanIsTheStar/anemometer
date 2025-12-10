@@ -219,7 +219,7 @@ void weather_task(void *params)
                         send_syslog_message("usurper", "Failed to read from weather station 30 times. ---REBOOT---.");    
 
                         // reboot
-                        application_restart();
+                        application_restart(REBOOT_WEATHER_FAILURE);
                     }          
                     break;
                 }

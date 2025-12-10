@@ -266,7 +266,7 @@ int thermostat_validate_gpio_set(void)
 
     if (!gpio_valid(config.thermostat_increase_button_gpio) || !gpio_valid(config.thermostat_decrease_button_gpio) || !gpio_valid(config.thermostat_mode_button_gpio))
     {
-        relay_gpio_valid = false;
+        button_gpio_valid = false;
     }    
 
     // tell subsystems they can use gpio

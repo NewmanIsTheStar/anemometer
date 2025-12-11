@@ -2393,18 +2393,44 @@ u16_t ssi_handler(int iIndex, char *pcInsert, int iInsertLen)
         break;            
         case SSI_tchs:  // thermostat current heating thresholds
         {
-            lower = web.thermostat_heating_set_point - config.thermostat_hysteresis;
-            upper = web.thermostat_heating_set_point + config.thermostat_hysteresis;
+            switch (web.thermostat_effective_mode)
+            {
+            case HVAC_AUTO:
+            case HVAC_HEATING_ONLY:
+            case HVAC_HEAT_AND_COOL:
+                lower = web.thermostat_heating_set_point - config.thermostat_hysteresis;
+                upper = web.thermostat_heating_set_point + config.thermostat_hysteresis;
 
-            printed = snprintf(pcInsert, iInsertLen, "%c%ld.%ld to %c%ld.%ld", lower<0?'-':' ', abs(lower)/10, abs(lower%10), upper<0?'-':' ', abs(upper)/10, abs(upper%10));
+                printed = snprintf(pcInsert, iInsertLen, "%c%ld.%ld to %c%ld.%ld", lower<0?'-':' ', abs(lower)/10, abs(lower%10), upper<0?'-':' ', abs(upper)/10, abs(upper%10));
+                break;
+            default:
+            case HVAC_OFF:
+            case HVAC_COOLING_ONLY:
+            case HVAC_FAN_ONLY:
+                printed = snprintf(pcInsert, iInsertLen, "undefined");
+                break;                
+            }
         }
         break;
         case SSI_tccs:  // thermostat current cooling thresholds
         {
-            lower = web.thermostat_cooling_set_point - config.thermostat_hysteresis;
-            upper = web.thermostat_cooling_set_point + config.thermostat_hysteresis;
+            switch (web.thermostat_effective_mode)
+            {
+            case HVAC_AUTO:
+            case HVAC_COOLING_ONLY:
+            case HVAC_HEAT_AND_COOL:
+                lower = web.thermostat_cooling_set_point - config.thermostat_hysteresis;
+                upper = web.thermostat_cooling_set_point + config.thermostat_hysteresis;
 
-            printed = snprintf(pcInsert, iInsertLen, "%c%ld.%ld to %c%ld.%ld", lower<0?'-':' ', abs(lower)/10, abs(lower%10), upper<0?'-':' ', abs(upper)/10, abs(upper%10));
+                printed = snprintf(pcInsert, iInsertLen, "%c%ld.%ld to %c%ld.%ld", lower<0?'-':' ', abs(lower)/10, abs(lower%10), upper<0?'-':' ', abs(upper)/10, abs(upper%10));
+                break;
+            default:
+            case HVAC_OFF:            
+            case HVAC_HEATING_ONLY:
+            case HVAC_FAN_ONLY:
+                printed = snprintf(pcInsert, iInsertLen, "undefined");
+                break;                
+            }            
         }
         break;   
         case SSI_grids:  // grid status

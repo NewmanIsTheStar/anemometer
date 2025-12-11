@@ -8,7 +8,7 @@ Thermostat for ordinary residential central heating and cooling systems based on
 ## Installation on Ubuntu Linux
 ```
 sudo apt install git build-essential cmake gcc-arm-none-eabi libnewlib-arm-none-eabi libstdc++-arm-none-eabi-newlib
-git clone --recurse-submodules https://github.com/NewmanIsTheStar/thermostat.git 
+git clone --recurse-submodules git@github.com:NewmanIsTheStar/thermostat.git
 cd thermostat
 mkdir build
 cd build

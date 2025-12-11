@@ -278,7 +278,7 @@ int initialize_physical_buttons(int mode_button_gpio, int increase_button_gpio, 
 {
     int err = 0;
 
-    if (button_gpio_enable)
+    if (button_gpio_ok)
     {
         // configure gpio for front panel push buttons
         gpio_init(config.thermostat_mode_button_gpio);

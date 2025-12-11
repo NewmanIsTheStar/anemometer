@@ -55,6 +55,7 @@ pico_sdk_init()
 
 if(NOT PICO_BOARD STREQUAL "pico_w") 
 include(FreeRTOS-Kernel/portable/ThirdParty/Community-Supported-Ports/GCC/RP2350_ARM_NTZ/FreeRTOS_Kernel_import.cmake)
+#include(FreeRTOS-Kernel/portable/ThirdParty/GCC/RP2350_ARM_NTZ/FreeRTOS_Kernel_import.cmake)  
 else()
 include(FreeRTOS_Kernel_import.cmake)
 endif()

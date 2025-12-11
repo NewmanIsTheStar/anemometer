@@ -129,6 +129,7 @@ THERMOSTAT_STATE_T control_thermostat_relays(long int temperaturex10)
         // reset hvac gpio
         set_hvac_gpio(thermostat_state);
     }
+    web.thermostat_effective_mode = effective_mode;
 
     if (temporary_setpoint_offset_changed())
     {

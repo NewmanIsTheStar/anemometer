@@ -6,7 +6,7 @@
 #ifndef WEATHER_H
 #define WEATHER_H
 
-
+#include "thermostat.h"
 
 //prototypes
 void weather_task(__unused void *params);
@@ -222,6 +222,7 @@ typedef struct WEB_VARIABLES
   int thermostat_temperature_moving_average;
   int thermostat_temperature_gradient;
   int thermostat_temperature_prediction;
+  THERMOSTAT_MODE_T thermostat_effective_mode;
 } WEB_VARIABLES_T;                  //remember to add initialization code when adding to this structure !!!
 
 #endif

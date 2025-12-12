@@ -18,21 +18,20 @@ cd build
 cmake ..
 make
 ```
-Upon completion of a successful build the file thermostat.uf2 should be created.  This may be loaded onto the Pico2 W in the usual manner.
+Upon completion of a successful build the file thermostat.uf2 should be created.  This may be loaded onto the Pico2 W by dragging and dropping in the usual manner.
 
 ## Initial Configuration
 - The Pico will initially create a WiFi network called **pluto**.  Connect to this WiFi network and then point your web browser to http://192.168.4.1
   - Note that many web browsers automatically change the URL from http:// to https:// so if it is not connecting you might need to reenter the URL.
 - Set the WiFi country, network and password then hit save and reboot.  The Pico will attempt to connect to the WiFi network.  If it fails then it will fall back to AP mode and you can once again connect to the pluto network and correct your mistakes.  
-- Use the GPIO settings page to configure the hardware connecions for relays, temperature sensor, display and buttons
+- Use the GPIO settings page to configure the hardware connections for relays, temperature sensor, display and buttons
 
 ## Hardware
 - Raspberry Pi Pico2 W
 - Raspberry Pi Pico Relay Board (with at least 3 relays)
 - AHT10 temperature sensor
-- Optional Hardware for control from front panel
-  - Seven Segment Display (4 digit or 6 digit)
-  - Momentary Push buttons (3)
+- Seven Segment Display (4 digit or 6 digit)
+- Momentary Push buttons (3)
 
 ## Licenses
 - SPDX-License-Identifier: BSD-3-Clause

@@ -91,11 +91,11 @@ body {
     </tr>
     <tr>
       <td>Heating target</td>
-      <td><!--#tchs--> &deg;<!--#tmpu--></td>
+      <td><!--#tchs--></td>
     </tr>    
     <tr>
       <td>Cooling target</td>
-      <td><!--#tccs--> &deg;<!--#tmpu--></td>
+      <td><!--#tccs--></td>
     </tr>  
     <tr>
       <td colspan="2">&nbsp;</td> 

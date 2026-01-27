@@ -202,14 +202,38 @@ int accumlate_metrics(uint32_t unix_time, long int temperaturex10, long int humi
     // add new temperature and humidity to trend buffer
     update_trend_buffer(&new_sample, &previous_sample);
 
-    // remember the sample for next time
-    previous_sample = new_sample;
+    // add new sample to history buffer if temperature has changed or we have less than two samples in the buffer (we need at least 2 points to plot a flat line)
+    if ((new_sample.temperaturex10 != previous_sample.temperaturex10) || climate_history.buffer_population <= 2)
+    {
+        // remember the sample for next time
+        previous_sample = new_sample;
 
-    // add new temperature and humidity to history buffer
-    update_history_buffer(&new_sample);
+        // add new temperature and humidity to history buffer
+        update_history_buffer(&new_sample);
 
-    // smooth out single sample trend reversals by replacing with straight line
-    smooth_temperature_history();
+        // smooth out single sample trend reversals by replacing with straight line
+        smooth_temperature_history();    
+    }
+    else
+    {
+        // check if we have two sequential samples with the same temperature (i.e. a flat line graph)
+        if (climate_history.buffer[get_climate_history_buffer_index(2)].temperaturex10 == climate_history.buffer[get_climate_history_buffer_index(1)].temperaturex10)
+        {
+            // save buffer space by updating the previous sample rather than storing a new sample with the same temperature
+            climate_history.buffer[get_climate_history_buffer_index(1)] = new_sample;
+
+            // remember the sample for next time
+            previous_sample = new_sample;        
+        }
+        else
+        {
+            // remember the sample for next time
+            previous_sample = new_sample;
+
+            // add new temperature and humidity to history buffer
+            update_history_buffer(&new_sample);            
+        }
+    }
 
     return(0);
 }

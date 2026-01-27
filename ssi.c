@@ -135,6 +135,7 @@ extern NON_VOL_VARIABLES_T config;
     x(mweek)     \
     x(colour)    \
     x(calpge)    \
+    x(porpge)    \
     x(swlhst)    \
     x(swlurl)    \
     x(swlfle)    \
@@ -1351,6 +1352,50 @@ u16_t ssi_handler(int iIndex, char *pcInsert, int iInsertLen)
             }
         }                                                                                                                                                   
         break; 
+        case SSI_porpge: //porpge
+        {
+            switch(config.personality)
+            {
+            default:
+            case NO_PERSONALITY:
+                printed = snprintf(pcInsert, iInsertLen, "/personality.shtml");
+                break;
+            case SPRINKLER_USURPER:
+                if (config.use_monday_as_week_start)
+                {
+                    printed = snprintf(pcInsert, iInsertLen, "/monday.shtml");
+                }
+                else
+                {
+                    printed = snprintf(pcInsert, iInsertLen, "/sunday.shtml");
+                }
+                break;
+            case SPRINKLER_CONTROLLER:
+                if (config.use_monday_as_week_start)
+                {
+                    printed = snprintf(pcInsert, iInsertLen, "/monday.shtml");
+                }
+                else
+                {
+                    printed = snprintf(pcInsert, iInsertLen, "/sunday.shtml");
+                }
+                break;                
+            case LED_STRIP_CONTROLLER:
+                printed = snprintf(pcInsert, iInsertLen, "/led_controller.shtml");
+                break;
+            case HVAC_THERMOSTAT:
+                if (config.use_monday_as_week_start)
+                {
+                    printed = snprintf(pcInsert, iInsertLen, "/t_schedule.cgi?day=1");
+                }
+                else
+                {
+                    printed = snprintf(pcInsert, iInsertLen, "/t_schedule.cgi?day=0");
+                }            
+                break;                
+            }
+        }                                                                                                                                                   
+        break;        
         case SSI_swlhst: //swlhst
         {
             printed = snprintf(pcInsert, iInsertLen, "%s", web.software_server);
@@ -2401,7 +2446,7 @@ u16_t ssi_handler(int iIndex, char *pcInsert, int iInsertLen)
                 lower = web.thermostat_heating_set_point - config.thermostat_hysteresis;
                 upper = web.thermostat_heating_set_point + config.thermostat_hysteresis;
 
-                printed = snprintf(pcInsert, iInsertLen, "%c%ld.%ld to %c%ld.%ld", lower<0?'-':' ', abs(lower)/10, abs(lower%10), upper<0?'-':' ', abs(upper)/10, abs(upper%10));
+                printed = snprintf(pcInsert, iInsertLen, "%c%ld.%ld to %c%ld.%ld %s%s", lower<0?'-':' ', abs(lower)/10, abs(lower%10), upper<0?'-':' ', abs(upper)/10, abs(upper%10), "&deg;", config.use_archaic_units?"F":"C");
                 break;
             default:
             case HVAC_OFF:
@@ -2422,7 +2467,7 @@ u16_t ssi_handler(int iIndex, char *pcInsert, int iInsertLen)
                 lower = web.thermostat_cooling_set_point - config.thermostat_hysteresis;
                 upper = web.thermostat_cooling_set_point + config.thermostat_hysteresis;
 
-                printed = snprintf(pcInsert, iInsertLen, "%c%ld.%ld to %c%ld.%ld", lower<0?'-':' ', abs(lower)/10, abs(lower%10), upper<0?'-':' ', abs(upper)/10, abs(upper%10));
+                printed = snprintf(pcInsert, iInsertLen, "%c%ld.%ld to %c%ld.%ld %s%s", lower<0?'-':' ', abs(lower)/10, abs(lower%10), upper<0?'-':' ', abs(upper)/10, abs(upper%10), "&deg;", config.use_archaic_units?"F":"C");
                 break;
             default:
             case HVAC_OFF:            

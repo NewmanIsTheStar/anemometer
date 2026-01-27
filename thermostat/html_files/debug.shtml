@@ -81,6 +81,7 @@ body {
     <p>syslog transmit failures:              <!--#sfail--></p>  
     <p>weather station transmit failures:     <!--#wfail--></p>  
     <p>govee transmit failures:               <!--#gfail--></p> 
+    <br>
     <p>temperature moving average:            <!--#ttma--></p>  
     <p>temperature gradient:                  <!--#ttgrd--></p>  
     <p>temperature prediction:                <!--#ttpred--></p>              

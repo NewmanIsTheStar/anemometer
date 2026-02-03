@@ -87,7 +87,7 @@ typedef struct
     int buffer_index;
     int buffer_population;
     CLIMATE_DATAPOINT_T moving_average;
-    int gradient;
+    long int gradient;
     int deltas[NUM_DELTAS];
     CLIMATE_TREND_DIRECTION_T current_trend;
     TickType_t trend_start_tick;
@@ -267,15 +267,25 @@ int update_history_buffer(CLIMATE_DATAPOINT_T *sample)
 int update_trend_buffer(CLIMATE_DATAPOINT_T *sample, CLIMATE_DATAPOINT_T *previous_sample)
 {
     int i;
-    int gradient = 0;
+    long int gradient = 0;
+    char timestamp[32];
    
     // store sample in sample_buffer
     climate_trend.sample_buffer[climate_trend.buffer_index] = *sample;
 
    // compute delta and store in delta buffer
     climate_trend.delta_buffer[climate_trend.buffer_index].unix_time = sample->unix_time;
-    climate_trend.delta_buffer[climate_trend.buffer_index].temperaturex10 = sample->temperaturex10 - previous_sample->temperaturex10;
-    climate_trend.delta_buffer[climate_trend.buffer_index].humidityx10    = sample->humidityx10    - previous_sample->humidityx10;
+    if (climate_trend.buffer_population >= 1)
+    {
+        climate_trend.delta_buffer[climate_trend.buffer_index].temperaturex10 = sample->temperaturex10 - previous_sample->temperaturex10;
+        climate_trend.delta_buffer[climate_trend.buffer_index].humidityx10    = sample->humidityx10    - previous_sample->humidityx10;
+    }
+    else
+    {
+        // first sample has zero delta
+        climate_trend.delta_buffer[climate_trend.buffer_index].temperaturex10 = 0;
+        climate_trend.delta_buffer[climate_trend.buffer_index].humidityx10    = 0;        
+    }
         
     // increment index for trend buffers
     climate_trend.buffer_index  = (climate_trend.buffer_index  + 1)%NUM_ROWS(climate_trend.delta_buffer);    
@@ -283,9 +293,7 @@ int update_trend_buffer(CLIMATE_DATAPOINT_T *sample, CLIMATE_DATAPOINT_T *previo
     // update population for trend buffers
     if (climate_trend.buffer_population < NUM_ROWS(climate_trend.delta_buffer)) climate_trend.buffer_population++;    
 
-    //printf("population = %d\n", climate_history.buffer_population);
-
-    // compute moving average and gradient
+    // compute moving average and gradient TODO: humidity
     climate_trend.moving_average.temperaturex10 = 0;
     gradient = 0;
     for(i=0; i < climate_trend.buffer_population; i++)
@@ -294,11 +302,14 @@ int update_trend_buffer(CLIMATE_DATAPOINT_T *sample, CLIMATE_DATAPOINT_T *previo
         gradient += climate_trend.delta_buffer[i].temperaturex10;
     }
     climate_trend.moving_average.temperaturex10 = climate_trend.moving_average.temperaturex10/climate_trend.buffer_population;
-    climate_trend.gradient = gradient*100/climate_trend.buffer_population;
+    climate_trend.moving_average.unix_time = unix_time;
+    climate_trend.gradient = gradient*10/climate_trend.buffer_population;
 
-    printf("Trend[%d]::moving average = %c%ld.%ld degrees\n", climate_trend.buffer_index, climate_trend.moving_average.temperaturex10<0?'-':' ', abs(climate_trend.moving_average.temperaturex10)/10, abs(climate_trend.moving_average.temperaturex10%10));
-
-    // update web interface
+    // print temperature and gradient
+    get_timestamp_from_unix_time(climate_trend.moving_average.unix_time, timestamp, NUM_ROWS(timestamp), 0, 1);
+    printf("%s     Temperature %c%ld.%ld degrees     Gradient %c%ld.%02ld degrees per sample\n", timestamp, climate_trend.moving_average.temperaturex10<0?'-':' ', abs(climate_trend.moving_average.temperaturex10)/10, abs(climate_trend.moving_average.temperaturex10%10), climate_trend.gradient<0?'-':' ', abs(climate_trend.gradient)/100, abs(climate_trend.gradient%100));
+    
+    // update web interface TODO: should web variables be long int?
     web.thermostat_temperature_moving_average = climate_trend.moving_average.temperaturex10;
     web.thermostat_temperature_gradient = climate_trend.gradient;
    
@@ -319,7 +330,7 @@ int update_trend_buffer(CLIMATE_DATAPOINT_T *sample, CLIMATE_DATAPOINT_T *previo
 
     if ((climate_trend.deltas[NEGATIVE_DELTA]>= 1) && (climate_trend.deltas[POSITIVE_DELTA] == 0))
     {
-        //printf("Trending down @ %d per sample\n", gradient);
+        //printf("Trending down @ %ld per sample\n", gradient);
         if (climate_trend.current_trend != TREND_DOWN)
         {
             climate_trend.current_tick = xTaskGetTickCount();  //TODO: use timestamp from the sample?
@@ -341,7 +352,7 @@ int update_trend_buffer(CLIMATE_DATAPOINT_T *sample, CLIMATE_DATAPOINT_T *previo
     } 
     else if ((climate_trend.deltas[POSITIVE_DELTA] >= 1) && (climate_trend.deltas[NEGATIVE_DELTA] == 0))
     {
-        //printf("Trending up @ %d per sample\n", gradient);
+        //printf("Trending up @ %ld per sample\n", gradient);
         if (climate_trend.current_trend != TREND_UP)
         {
             climate_trend.current_tick = xTaskGetTickCount();  //TODO: use timestamp from the sample?

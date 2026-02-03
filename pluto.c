@@ -113,14 +113,14 @@ int pluto(void)
     printf("\n%s version ", APP_NAME);
 
 #ifdef USE_GIT_HASH_AS_VERSION
-    printf("%s\n", GITHASH);
+    printf("%s\n\n", GITHASH);
 #else
-    printf("%s\n", PLUTO_VER);
+    printf("%s\n\n", PLUTO_VER);
 #endif
 
     flash_get_program_size();
-    printf("Compiled: %s %s\n\n",__DATE__,__TIME__);
-    printf("Pico SDK Version: %s\n", PICO_SDK_VERSION_STRING);
+    printf("Compiled: %s %s\n",__DATE__,__TIME__);
+    printf("Pico SDK Version: %s\n\n", PICO_SDK_VERSION_STRING);
 
 
     if (watchdog_caused_reboot())

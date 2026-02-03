@@ -1070,3 +1070,94 @@ int8_t get_datetime(datetime_t *date, int localtime)
 
    return(1);
 }
+
+/*!
+ * \brief Get current time
+ *  
+ * \return 1
+ */
+int8_t get_datetime_from_unix_time(uint32_t unixtime, datetime_t *date, int localtime)
+{
+   struct tm * timeinfo;
+   time_t t;
+
+   t = unixtime;
+
+   if (localtime)
+   {
+      // apply timezone offset
+      t += (config.timezone_offset * 60);
+   }
+
+	timeinfo = gmtime(&t);
+
+	memset(date, 0, sizeof(datetime_t));
+	date->sec = timeinfo->tm_sec;
+	date->min = timeinfo->tm_min;
+	date->hour = timeinfo->tm_hour;
+	date->day = timeinfo->tm_mday;
+	date->month = timeinfo->tm_mon + 1;
+	date->year = timeinfo->tm_year + 1900;
+
+   date->dotw = get_day_of_week(date->month, date->day, date->year);
+
+   return(1);
+}
+
+/*!
+ * \brief Generate string containing time stamp from unix time
+ *
+ * \param[in]   unixtime    unix time  
+ * \param[out]  timestamp   pointer to string to store the timestamp 
+ * \param[in]   len         max length of timestamp string  
+ * \param[in]   isoformat   use iso format
+ * \param[in]   localtime   use local time
+ * 
+ * \return 0 on success, non-zero on error
+ */
+int get_timestamp_from_unix_time(uint32_t unixtime, char *timestamp, int len, int isoformat, int localtime)
+{
+   int ok = 0;
+   datetime_t t;
+   char timezone_offset[12];
+
+
+   ok = get_datetime_from_unix_time(unixtime, &t, localtime);      
+
+   if (ok)
+   {
+      if (!localtime || (config.timezone_offset == 0)) 
+      {
+         // zulu time
+         if (isoformat)
+         {
+            sprintf(timezone_offset, "Z");
+         }
+         else
+         {
+            sprintf(timezone_offset, "");
+         }
+      }
+      else
+      {
+         sprintf(timezone_offset, "%c%02d:%02d", config.timezone_offset<0?'-':'+', abs(config.timezone_offset/60), abs(config.timezone_offset%60));
+      }
+
+      if (isoformat)
+      {
+         // iso format needed for syslog
+         snprintf(timestamp, len, "%04d-%02d-%02dT%02d:%02d:%02d.000%s", t.year, t.month, t.day, t.hour, t.min, t.sec, timezone_offset);
+      }
+      else
+      {
+        // human readable format
+        snprintf(timestamp, len, "%04d-%02d-%02d %02d:%02d:%02d UTC%s", t.year, t.month, t.day, t.hour, t.min, t.sec, timezone_offset);
+      }
+    }
+    else
+    {
+        snprintf(timestamp, len, "1970-01-01T00:00:000.000Z");  //default to unix epoch
+    }
+
+    return !ok;
+}

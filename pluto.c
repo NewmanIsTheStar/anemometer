@@ -120,6 +120,8 @@ int pluto(void)
 
     flash_get_program_size();
     printf("Compiled: %s %s\n\n",__DATE__,__TIME__);
+    printf("Pico SDK Version: %s\n", PICO_SDK_VERSION_STRING);
+
 
     if (watchdog_caused_reboot())
     {
@@ -207,7 +209,7 @@ void boss_task(__unused void *params)
          cyw43_arch_deinit();
          SLEEP_MS(1000);       
     } 
-#ifndef TEST_AP_MODE    
+#ifndef TEST_AP_MODE 
     // enable wifi station mode
     cyw43_arch_enable_sta_mode();
 

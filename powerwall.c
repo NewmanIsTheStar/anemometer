@@ -35,7 +35,7 @@
 #include "mbedtls/entropy.h"
 #include "mbedtls/ctr_drbg.h"
 #include "mbedtls/error.h"
-#include "mbedtls/certs.h"
+//#include "mbedtls/certs.h"
 
 // Mbed TLS
 //#include "mbedtls/ssl.h"            // Server Name Indication TLS extension
@@ -181,7 +181,7 @@ void powerwall_poll(void)
         case PW_CONNECT:
             // connect to powerwall
             pcb = NULL;
-            //printf("Connecting to https://%s:%d\n", char_ipaddr, LWIP_IANA_PORT_HTTPS);
+            printf("Connecting to https://%s:%d\n", char_ipaddr, LWIP_IANA_PORT_HTTPS);
             if(!connect_to_host(&ipaddr, &pcb))
             {
                 printf("Failed to connect to powerwall at https://%s:%d\n", char_ipaddr, LWIP_IANA_PORT_HTTPS);

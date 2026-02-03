@@ -53,7 +53,8 @@ typedef enum
 {
     HVAC_LOCKOUT_TIMER   = 0,
     HVAC_OVERSHOOT_TIMER = 1,   
-    NUM_HVAC_TIMERS      = 2
+    HVAC_FAULT_TIMER     = 2,     
+    NUM_HVAC_TIMERS      = 3
 } CLIMATE_TIMER_INDEX_T;
 
 typedef enum
@@ -102,270 +103,300 @@ THERMOSTAT_STATE_T control_thermostat_relays(long int temperaturex10)
     bool fan_allowed = false;     
     int temporary_set_point_offsetx10 = 0;  
 
-    // check for temperature offset entered on front panel display
-    temporary_set_point_offsetx10 = display_get_setpoint_offset();
-
-    // determine current setpoints based on schedule, powerwall status and last cycle
-    update_current_setpoints(last_active, temperaturex10, temporary_set_point_offsetx10);
-
-    // determine effective mode
-    front_panel_mode = get_front_panel_mode();
-
-    if (front_panel_mode == HVAC_AUTO)
+    // check temperature is valid
+    if (temperaturex10 != TEMPERATURE_INVALID)
     {
-        effective_mode = scheduled_mode;
-    }
-    else if (front_panel_mode != effective_mode)  
-    {
-        // user has set a new mode on the front panel
-        effective_mode = front_panel_mode;
+        // check for temperature offset entered on front panel display
+        temporary_set_point_offsetx10 = display_get_setpoint_offset();
 
-        // reset state machine to immediately process mode change        
-        thermostat_state = HEATING_AND_COOLING_OFF;
-        next_active =  HEATING_AND_COOLING_OFF;
-        last_active =  HEATING_AND_COOLING_OFF; 
-        thermostat_relay_lockout_stop();
-        
-        // reset hvac gpio
-        set_hvac_gpio(thermostat_state);
-    }
-    web.thermostat_effective_mode = effective_mode;
+        // determine current setpoints based on schedule, powerwall status and last cycle
+        update_current_setpoints(last_active, temperaturex10, temporary_set_point_offsetx10);
 
-    if (temporary_setpoint_offset_changed())
-    {
-        // user has changed temperature on front panel so cancel lockouts
-        thermostat_relay_lockout_stop();
-    }
+        // determine effective mode
+        front_panel_mode = get_front_panel_mode();
 
-    // determine permitted operations
-    switch(effective_mode)
-    {
-        default:
-        case HVAC_OFF:
-            cooling_allowed = false;
-            heating_allowed = false;
-            fan_allowed = false;
-            break;
-        case HVAC_HEATING_ONLY:
-            cooling_allowed = false;
-            heating_allowed = true;
-            fan_allowed = true;
-            break;            
-        case HVAC_COOLING_ONLY:
-            cooling_allowed = true;
-            heating_allowed = false;
-            fan_allowed = true;
-            break;
-        case HVAC_FAN_ONLY:
-            cooling_allowed = false;
-            heating_allowed = false;
-            fan_allowed = true;
-            break;        
-        case HVAC_AUTO: 
-        case HVAC_HEAT_AND_COOL:      
-            cooling_allowed = true;
-            heating_allowed = true;
-            fan_allowed = true;
-            break;        
-    }   
-
-    // update thermostat state
-    switch(thermostat_state)
-    {
-    default:    
-    case HEATING_AND_COOLING_OFF:
-    case FAN_ONLY_IN_PROGRESS:
-        if (cooling_allowed & (temperaturex10 > (web.thermostat_cooling_set_point + config.thermostat_hysteresis)))
+        if (front_panel_mode == HVAC_AUTO)
         {
-            if (last_active != HEATING_IN_PROGRESS)
-            {
-                send_syslog_message("thermostat", "Cooling commenced");            
-                snprintf(web.status_message, sizeof(web.status_message), "Cooling in progress");            
-
-                set_hvac_gpio(COOLING_IN_PROGRESS);
-
-                // lockout state changes
-                hvac_timer_start(HVAC_LOCKOUT_TIMER, config.minimum_cooling_on_mins);                 
-                thermostat_state = THERMOSTAT_LOCKOUT;                 
-                next_active =  COOLING_IN_PROGRESS; 
-
-                set_hvac_lag(COOLING_LAG);
-            }
-            else
-            {
-                send_syslog_message("thermostat", "Transition from heating to cooling! Lockout commenced!");
-                snprintf(web.status_message, sizeof(web.status_message), "Transition from heating to cooling");                
-
-                set_hvac_gpio(HEATING_AND_COOLING_OFF);
-
-                // lockout state changes
-                hvac_timer_start(HVAC_LOCKOUT_TIMER, config.heating_to_cooling_lockout_mins);                 
-                thermostat_state = THERMOSTAT_LOCKOUT;                 
-                next_active =  HEATING_AND_COOLING_OFF;
-                last_active =  HEATING_AND_COOLING_OFF;                                   
-            }
-        } else if (heating_allowed && (temperaturex10 < (web.thermostat_heating_set_point - config.thermostat_hysteresis)))
-        {
-            if (last_active != COOLING_IN_PROGRESS)
-            {
-                send_syslog_message("thermostat", "Heating commenced");            
-                snprintf(web.status_message, sizeof(web.status_message), "Heating in progress");            
-
-                
-                set_hvac_gpio(HEATING_IN_PROGRESS);
-                
-                // lockout state changes
-                hvac_timer_start(HVAC_LOCKOUT_TIMER, config.minimum_heating_on_mins);
-                thermostat_state = THERMOSTAT_LOCKOUT;                
-                next_active =  HEATING_IN_PROGRESS;
-
-                set_hvac_lag(HEATING_LAG);  
-            }
-            else
-            {
-                send_syslog_message("thermostat", "Transition from cooling to heating! Lockout commenced!");
-                snprintf(web.status_message, sizeof(web.status_message), "Transition from cooling to heating"); 
-
-                set_hvac_gpio(HEATING_AND_COOLING_OFF);
-
-                // lockout state changes
-                hvac_timer_start(HVAC_LOCKOUT_TIMER, config.heating_to_cooling_lockout_mins);
-                thermostat_state = THERMOSTAT_LOCKOUT;                
-                next_active =  HEATING_AND_COOLING_OFF;
-                last_active =  HEATING_AND_COOLING_OFF;                                                      
-            }                        
+            effective_mode = scheduled_mode;
         }
-        else if ((effective_mode == HVAC_FAN_ONLY) && (thermostat_state != FAN_ONLY_IN_PROGRESS))
-        {           
-            set_hvac_gpio(FAN_ONLY_IN_PROGRESS);  
-            thermostat_state = FAN_ONLY_IN_PROGRESS;     
-        }        
-        break;
-    case HEATING_IN_PROGRESS:
-        if (temperaturex10 > (web.thermostat_heating_set_point + config.thermostat_hysteresis))
+        else if (front_panel_mode != effective_mode)  
         {
-            send_syslog_message("thermostat", "Heating completed");            
-            snprintf(web.status_message, sizeof(web.status_message), "Heating completed");  
-            mark_hvac_off(HEATING_LAG, temperaturex10);         
+            // user has set a new mode on the front panel
+            effective_mode = front_panel_mode;
 
-            set_hvac_gpio(HEATING_AND_COOLING_OFF);
-
-            // check for excessive overshoot that could trigger cooling
-            if (temperaturex10 > (web.thermostat_cooling_set_point - config.thermostat_hysteresis))
-            {
-                send_syslog_message("thermostat", "Excessive overshoot. Suspending operation.");            
-                snprintf(web.status_message, sizeof(web.status_message), "Excessive overshoot. Suspending operation."); 
-                
-                // lockout state changes
-                hvac_timer_start(HVAC_LOCKOUT_TIMER, config.minimum_heating_off_mins);             
-                thermostat_state = THERMOSTAT_LOCKOUT;                     
-                next_active =  EXCESSIVE_OVERSHOOT;
-                last_active = HEATING_IN_PROGRESS;                
-            }
-            else
-            {
-                // lockout state changes
-                hvac_timer_start(HVAC_LOCKOUT_TIMER, config.minimum_heating_off_mins);             
-                thermostat_state = THERMOSTAT_LOCKOUT;                       
-                next_active =  HEATING_AND_COOLING_OFF;
-                last_active = HEATING_IN_PROGRESS;
-            }
-        } 
-        else
-        {
-                predicted_time_to_temperature(web.thermostat_heating_set_point + config.thermostat_hysteresis);
-        }
-        break;
-    case COOLING_IN_PROGRESS:
-        if (temperaturex10 < (web.thermostat_cooling_set_point - config.thermostat_hysteresis))
-        {
-            send_syslog_message("thermostat", "Cooling completed");            
-            snprintf(web.status_message, sizeof(web.status_message), "Cooling completed"); 
-            mark_hvac_off(COOLING_LAG, temperaturex10);
-
-            set_hvac_gpio(HEATING_AND_COOLING_OFF);
-
-            // check for excessive overshoot that could trigger heating
-            if (temperaturex10 < (web.thermostat_heating_set_point + config.thermostat_hysteresis))
-            {
-                send_syslog_message("thermostat", "Excessive overshoot. Suspending operation.");            
-                snprintf(web.status_message, sizeof(web.status_message), "Excessive overshoot. Suspending operation."); 
-
-                // lockout state changes
-                hvac_timer_start(HVAC_LOCKOUT_TIMER, config.minimum_cooling_off_mins);            
-                thermostat_state = THERMOSTAT_LOCKOUT;            
-                next_active =  EXCESSIVE_OVERSHOOT;    
-                last_active = COOLING_IN_PROGRESS;  
-            }
-            else
-            {
-                // lockout state changes
-                hvac_timer_start(HVAC_LOCKOUT_TIMER, config.minimum_cooling_off_mins);            
-                thermostat_state = THERMOSTAT_LOCKOUT;            
-                next_active =  HEATING_AND_COOLING_OFF;    
-                last_active = COOLING_IN_PROGRESS;  
-            }          
-        }
-        else
-        {
-             predicted_time_to_temperature(web.thermostat_cooling_set_point - config.thermostat_hysteresis);
-        } 
-        break;
-    case DUCT_PURGE:
-        if (0 /*time expired*/)
-        {
-            send_syslog_message("thermostat", "Duct purge complete");            
-            snprintf(web.status_message, sizeof(web.status_message), "Duct purge completed"); 
-
-            // disable lockout
-            hvac_timer_start(HVAC_LOCKOUT_TIMER, 0);
+            // reset state machine to immediately process mode change        
             thermostat_state = HEATING_AND_COOLING_OFF;
-        } 
-        break;   
-    case THERMOSTAT_LOCKOUT:
-        // check if lockout complete
-        if (hvac_timer_expired(HVAC_LOCKOUT_TIMER))
-        {
-            // change to next active state
-            thermostat_state = next_active;
-            if (thermostat_state == EXCESSIVE_OVERSHOOT)
-            {
-                hvac_timer_start(HVAC_OVERSHOOT_TIMER, 2*60*60*1000); 
-            }
-        }
-        else
-        {
-            //printf("HVAC CONTROL DAMPING LOCKOUT -- no control changed permitted at present\n");
-        }               
-        break;    
-    case EXCESSIVE_OVERSHOOT:    
-        if ((last_active == HEATING_IN_PROGRESS) &&
-            (temperaturex10 < (web.thermostat_heating_set_point + config.thermostat_hysteresis)))
-        {
-            send_syslog_message("thermostat", "Temperature has fallen to target range. Resuming operation");            
-            snprintf(web.status_message, sizeof(web.status_message), "Resuming operation"); 
-
-            thermostat_state = HEATING_AND_COOLING_OFF;
-        }
-
-        if ((last_active == COOLING_IN_PROGRESS) &&
-            (temperaturex10 > (web.thermostat_cooling_set_point - config.thermostat_hysteresis)))
-        {
-            send_syslog_message("thermostat", "Temperature has risen to target range. Resuming operation");            
-            snprintf(web.status_message, sizeof(web.status_message), "Resuming operation"); 
-
-            thermostat_state = HEATING_AND_COOLING_OFF;
-        }    
-        
-        if (hvac_timer_expired(HVAC_OVERSHOOT_TIMER))
-        {
-            send_syslog_message("thermostat", "Overshoot timeout.  Resuming operation");            
-            snprintf(web.status_message, sizeof(web.status_message), "Resuming operation");  
+            next_active =  HEATING_AND_COOLING_OFF;
+            last_active =  HEATING_AND_COOLING_OFF; 
+            thermostat_relay_lockout_stop();
             
-            thermostat_state = HEATING_AND_COOLING_OFF;
+            // reset hvac gpio
+            set_hvac_gpio(thermostat_state);
+        }
+        web.thermostat_effective_mode = effective_mode;
+
+        if (temporary_setpoint_offset_changed())
+        {
+            // user has changed temperature on front panel so cancel lockouts
+            thermostat_relay_lockout_stop();
         }
 
-        break;                        
+        // determine permitted operations
+        switch(effective_mode)
+        {
+            default:
+            case HVAC_OFF:
+                cooling_allowed = false;
+                heating_allowed = false;
+                fan_allowed = false;
+                break;
+            case HVAC_HEATING_ONLY:
+                cooling_allowed = false;
+                heating_allowed = true;
+                fan_allowed = true;
+                break;            
+            case HVAC_COOLING_ONLY:
+                cooling_allowed = true;
+                heating_allowed = false;
+                fan_allowed = true;
+                break;
+            case HVAC_FAN_ONLY:
+                cooling_allowed = false;
+                heating_allowed = false;
+                fan_allowed = true;
+                break;        
+            case HVAC_AUTO: 
+            case HVAC_HEAT_AND_COOL:      
+                cooling_allowed = true;
+                heating_allowed = true;
+                fan_allowed = true;
+                break;        
+        }   
+
+        // update thermostat state
+        switch(thermostat_state)
+        {
+        default:    
+        case HEATING_AND_COOLING_OFF:
+        case FAN_ONLY_IN_PROGRESS:
+            if (cooling_allowed & (temperaturex10 > (web.thermostat_cooling_set_point + config.thermostat_hysteresis)))
+            {
+                if (last_active != HEATING_IN_PROGRESS)
+                {
+                    send_syslog_message("thermostat", "Cooling commenced");            
+                    snprintf(web.status_message, sizeof(web.status_message), "Cooling in progress");            
+
+                    set_hvac_gpio(COOLING_IN_PROGRESS);
+
+                    // lockout state changes
+                    hvac_timer_start(HVAC_LOCKOUT_TIMER, config.minimum_cooling_on_mins);                 
+                    thermostat_state = THERMOSTAT_LOCKOUT;                 
+                    next_active =  COOLING_IN_PROGRESS; 
+
+                    set_hvac_lag(COOLING_LAG);
+                }
+                else
+                {
+                    send_syslog_message("thermostat", "Transition from heating to cooling! Lockout commenced!");
+                    snprintf(web.status_message, sizeof(web.status_message), "Transition from heating to cooling");                
+
+                    set_hvac_gpio(HEATING_AND_COOLING_OFF);
+
+                    // lockout state changes
+                    hvac_timer_start(HVAC_LOCKOUT_TIMER, config.heating_to_cooling_lockout_mins);                 
+                    thermostat_state = THERMOSTAT_LOCKOUT;                 
+                    next_active =  HEATING_AND_COOLING_OFF;
+                    last_active =  HEATING_AND_COOLING_OFF;                                   
+                }
+            } else if (heating_allowed && (temperaturex10 < (web.thermostat_heating_set_point - config.thermostat_hysteresis)))
+            {
+                if (last_active != COOLING_IN_PROGRESS)
+                {
+                    send_syslog_message("thermostat", "Heating commenced");            
+                    snprintf(web.status_message, sizeof(web.status_message), "Heating in progress");            
+
+                    
+                    set_hvac_gpio(HEATING_IN_PROGRESS);
+                    
+                    // lockout state changes
+                    hvac_timer_start(HVAC_LOCKOUT_TIMER, config.minimum_heating_on_mins);
+                    thermostat_state = THERMOSTAT_LOCKOUT;                
+                    next_active =  HEATING_IN_PROGRESS;
+
+                    set_hvac_lag(HEATING_LAG);  
+                }
+                else
+                {
+                    send_syslog_message("thermostat", "Transition from cooling to heating! Lockout commenced!");
+                    snprintf(web.status_message, sizeof(web.status_message), "Transition from cooling to heating"); 
+
+                    set_hvac_gpio(HEATING_AND_COOLING_OFF);
+
+                    // lockout state changes
+                    hvac_timer_start(HVAC_LOCKOUT_TIMER, config.heating_to_cooling_lockout_mins);
+                    thermostat_state = THERMOSTAT_LOCKOUT;                
+                    next_active =  HEATING_AND_COOLING_OFF;
+                    last_active =  HEATING_AND_COOLING_OFF;                                                      
+                }                        
+            }
+            else if ((effective_mode == HVAC_FAN_ONLY) && (thermostat_state != FAN_ONLY_IN_PROGRESS))
+            {           
+                set_hvac_gpio(FAN_ONLY_IN_PROGRESS);  
+                thermostat_state = FAN_ONLY_IN_PROGRESS;     
+            }        
+            break;
+        case HEATING_IN_PROGRESS:
+            if (temperaturex10 > (web.thermostat_heating_set_point + config.thermostat_hysteresis))
+            {
+                send_syslog_message("thermostat", "Heating completed");            
+                snprintf(web.status_message, sizeof(web.status_message), "Heating completed");  
+                mark_hvac_off(HEATING_LAG, temperaturex10);         
+
+                set_hvac_gpio(HEATING_AND_COOLING_OFF);
+
+                // check for excessive overshoot that could trigger cooling
+                if (temperaturex10 > (web.thermostat_cooling_set_point - config.thermostat_hysteresis))
+                {
+                    send_syslog_message("thermostat", "Excessive overshoot. Suspending operation.");            
+                    snprintf(web.status_message, sizeof(web.status_message), "Excessive overshoot. Suspending operation."); 
+                    
+                    // lockout state changes
+                    hvac_timer_start(HVAC_LOCKOUT_TIMER, config.minimum_heating_off_mins);             
+                    thermostat_state = THERMOSTAT_LOCKOUT;                     
+                    next_active =  EXCESSIVE_OVERSHOOT;
+                    last_active = HEATING_IN_PROGRESS;                
+                }
+                else
+                {
+                    // lockout state changes
+                    hvac_timer_start(HVAC_LOCKOUT_TIMER, config.minimum_heating_off_mins);             
+                    thermostat_state = THERMOSTAT_LOCKOUT;                       
+                    next_active =  HEATING_AND_COOLING_OFF;
+                    last_active = HEATING_IN_PROGRESS;
+                }
+            } 
+            else
+            {
+                    predicted_time_to_temperature(web.thermostat_heating_set_point + config.thermostat_hysteresis);
+            }
+            break;
+        case COOLING_IN_PROGRESS:
+            if (temperaturex10 < (web.thermostat_cooling_set_point - config.thermostat_hysteresis))
+            {
+                send_syslog_message("thermostat", "Cooling completed");            
+                snprintf(web.status_message, sizeof(web.status_message), "Cooling completed"); 
+                mark_hvac_off(COOLING_LAG, temperaturex10);
+
+                set_hvac_gpio(HEATING_AND_COOLING_OFF);
+
+                // check for excessive overshoot that could trigger heating
+                if (temperaturex10 < (web.thermostat_heating_set_point + config.thermostat_hysteresis))
+                {
+                    send_syslog_message("thermostat", "Excessive overshoot. Suspending operation.");            
+                    snprintf(web.status_message, sizeof(web.status_message), "Excessive overshoot. Suspending operation."); 
+
+                    // lockout state changes
+                    hvac_timer_start(HVAC_LOCKOUT_TIMER, config.minimum_cooling_off_mins);            
+                    thermostat_state = THERMOSTAT_LOCKOUT;            
+                    next_active =  EXCESSIVE_OVERSHOOT;    
+                    last_active = COOLING_IN_PROGRESS;  
+                }
+                else
+                {
+                    // lockout state changes
+                    hvac_timer_start(HVAC_LOCKOUT_TIMER, config.minimum_cooling_off_mins);            
+                    thermostat_state = THERMOSTAT_LOCKOUT;            
+                    next_active =  HEATING_AND_COOLING_OFF;    
+                    last_active = COOLING_IN_PROGRESS;  
+                }          
+            }
+            else
+            {
+                predicted_time_to_temperature(web.thermostat_cooling_set_point - config.thermostat_hysteresis);
+            } 
+            break;
+        case DUCT_PURGE:
+            if (0 /*time expired*/)
+            {
+                send_syslog_message("thermostat", "Duct purge complete");            
+                snprintf(web.status_message, sizeof(web.status_message), "Duct purge completed"); 
+
+                // disable lockout
+                hvac_timer_start(HVAC_LOCKOUT_TIMER, 0);
+                thermostat_state = HEATING_AND_COOLING_OFF;
+            } 
+            break;   
+        case THERMOSTAT_LOCKOUT:
+            // check if lockout complete
+            if (hvac_timer_expired(HVAC_LOCKOUT_TIMER))
+            {
+                // change to next active state
+                thermostat_state = next_active;
+                if (thermostat_state == EXCESSIVE_OVERSHOOT)
+                {
+                    hvac_timer_start(HVAC_OVERSHOOT_TIMER, 2*60*60*1000); 
+                }
+            }
+            else
+            {
+                //printf("HVAC CONTROL DAMPING LOCKOUT -- no control changed permitted at present\n");
+            }               
+            break;    
+        case EXCESSIVE_OVERSHOOT:    
+            if ((last_active == HEATING_IN_PROGRESS) &&
+                (temperaturex10 < (web.thermostat_heating_set_point + config.thermostat_hysteresis)))
+            {
+                send_syslog_message("thermostat", "Temperature has fallen to target range. Resuming operation");            
+                snprintf(web.status_message, sizeof(web.status_message), "Resuming operation"); 
+
+                thermostat_state = HEATING_AND_COOLING_OFF;
+            }
+
+            if ((last_active == COOLING_IN_PROGRESS) &&
+                (temperaturex10 > (web.thermostat_cooling_set_point - config.thermostat_hysteresis)))
+            {
+                send_syslog_message("thermostat", "Temperature has risen to target range. Resuming operation");            
+                snprintf(web.status_message, sizeof(web.status_message), "Resuming operation"); 
+
+                thermostat_state = HEATING_AND_COOLING_OFF;
+            }    
+            
+            if (hvac_timer_expired(HVAC_OVERSHOOT_TIMER))
+            {
+                send_syslog_message("thermostat", "Overshoot timeout.  Resuming operation");            
+                snprintf(web.status_message, sizeof(web.status_message), "Resuming operation");  
+                
+                thermostat_state = HEATING_AND_COOLING_OFF;
+            }
+            break;                        
+        case FAULT_LOCKOUT:
+            // check if lockout complete
+            if (hvac_timer_expired(HVAC_FAULT_TIMER))
+            {
+                // change to next active state
+                thermostat_state = next_active;
+            }              
+            break;             
+        }
+    }
+    else
+    {
+        // temperature is invalid so ensure that system is off
+        if (thermostat_state != HEATING_AND_COOLING_OFF)
+        {
+            send_syslog_message("thermostat", "HVAC disabled. Temperature sensor failed.");            
+            snprintf(web.status_message, sizeof(web.status_message), "HVAC disabled. Temperature sensor failed."); 
+
+            // lockout state changes for 60 minutes
+            hvac_timer_start(HVAC_FAULT_TIMER, 60);   
+
+            last_active =  thermostat_state;             
+            thermostat_state = FAULT_LOCKOUT;                     
+            next_active =  HEATING_AND_COOLING_OFF;            
+        }
+
+        // unconditionally set relays off
+        set_hvac_gpio(HEATING_AND_COOLING_OFF);        
     }
                                
     return(thermostat_state);

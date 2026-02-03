@@ -133,6 +133,7 @@ void thermostat_task(void *params)
             {
                 printf("aht10: i2c error occured will attempt soft reset\n");              
                 thermostat_deinitialize(thermostat_initialize_temperature_sensor);
+                temperaturex10 = TEMPERATURE_INVALID;
             }
             else
             {                
@@ -148,7 +149,7 @@ void thermostat_task(void *params)
             }
             
             // check powerwall status
-            powerwall_check();
+            powerwall_check();  // TODO:  DISABLED DUE TO UPGRADE to pico-sdk 2.2.0 which breaks https (mbedtls changes)
 
             // set hvac relays
             control_thermostat_relays(temperaturex10);

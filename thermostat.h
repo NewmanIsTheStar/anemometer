@@ -8,19 +8,20 @@
 
 #include "FreeRTOS.h"
 
-#define THERMOSTAT_TASK_LOOP_DELAY (10000)
-#define SETPOINT_DEFAULT_CELSIUS_X_10 (210)      // 21.0 C
-#define SETPOINT_MAX_CELSIUS_X_10 (320)          // 32.0 C
-#define SETPOINT_MIN_CELSIUS_X_10 (150)          // 15.0 C 
-#define SETPOINT_DEFAULT_FAHRENHEIT_X_10 (700)   // 70.0 F
-#define SETPOINT_MAX_FAHRENHEIT_X_10 (900)       // 90.0 F
-#define SETPOINT_MIN_FAHRENHEIT_X_10 (600)       // 60.0 F
-#define SETPOINT_TEMP_UNDEFINED   (-10001)
-#define SETPOINT_TEMP_INVALID_FAN (-10002)
-#define SETPOINT_TEMP_INVALID_OFF (-10003)
-#define SETPOINT_TEMP_DEFAULT_C   (210)
-#define SETPOINT_TEMP_DEFAULT_F   (700)
-#define DISPLAY_MAX_BRIGHTNESS    (7)
+#define THERMOSTAT_TASK_LOOP_DELAY       (10000)
+#define SETPOINT_DEFAULT_CELSIUS_X_10    (210)      // 21.0 C
+#define SETPOINT_MAX_CELSIUS_X_10        (320)      // 32.0 C
+#define SETPOINT_MIN_CELSIUS_X_10        (150)      // 15.0 C 
+#define SETPOINT_DEFAULT_FAHRENHEIT_X_10 (700)      // 70.0 F
+#define SETPOINT_MAX_FAHRENHEIT_X_10     (900)      // 90.0 F
+#define SETPOINT_MIN_FAHRENHEIT_X_10     (600)      // 60.0 F
+#define SETPOINT_TEMP_UNDEFINED          (-10001)
+#define SETPOINT_TEMP_INVALID_FAN        (-10002)
+#define SETPOINT_TEMP_INVALID_OFF        (-10003)
+#define SETPOINT_TEMP_DEFAULT_C          (210)
+#define SETPOINT_TEMP_DEFAULT_F          (700)
+#define DISPLAY_MAX_BRIGHTNESS           (7)
+#define TEMPERATURE_INVALID              (2000)
 
 typedef enum
 {
@@ -41,7 +42,8 @@ typedef enum
     FAN_ONLY_IN_PROGRESS = 3,
     DUCT_PURGE = 4,
     THERMOSTAT_LOCKOUT = 5,
-    EXCESSIVE_OVERSHOOT = 6
+    EXCESSIVE_OVERSHOOT = 6,
+    FAULT_LOCKOUT = 7,
 } THERMOSTAT_STATE_T;         // operational state
 
 typedef enum

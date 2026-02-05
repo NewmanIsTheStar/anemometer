@@ -72,15 +72,15 @@ body {
   <h2>Status</h2>  
   <table>
     <tr>
-      <td colspan="2"><!--#status--></td>
+      <td font-weight: bold; colspan="2"><!--#status--></td>
     </tr>
+    <tr>
+      <td colspan="2">&nbsp;</td> 
+    </tr>      
     <tr>
       <td>Local Time</td>
       <td><!--#ltme--></td>
     </tr>
-    <tr>
-      <td colspan="2">&nbsp;</td> 
-    </tr>    
     <tr>
       <td>Temperature</td>
       <td><!--#tct--> &deg;<!--#tmpu--></td>      

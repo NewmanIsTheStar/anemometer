@@ -80,7 +80,7 @@ body {
             </td>
           </tr> 
           <tr>
-            <td><label for="dsenable">Automatically Adjust for Daylight Saving</label></td>
+            <td><label for="dsenable">Adjust for Daylight Saving</label></td>
             <td><input type="checkbox" id="dsenable" name="dsenable" value="on" style="height:20px; width:20px; vertical-align: middle;" <!--#dlse-->></td>
           </tr>  
           <tr>

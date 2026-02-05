@@ -1759,7 +1759,7 @@ u16_t ssi_handler(int iIndex, char *pcInsert, int iInsertLen)
                 printed = snprintf(pcInsert, iInsertLen, "LED Controller");
                 break;
             case HVAC_THERMOSTAT:
-                printed = snprintf(pcInsert, iInsertLen, "HVAC Controller");
+                printed = snprintf(pcInsert, iInsertLen, "HVAC Thermostat");
                 break;     
             case HOME_CONTROLLER:
                 printed = snprintf(pcInsert, iInsertLen, "Home Controller");

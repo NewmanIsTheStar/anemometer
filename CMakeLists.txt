@@ -5,8 +5,8 @@ cmake_minimum_required(VERSION 3.13..3.27)
 set(APP_VERSION "01.00.03")
 
 # Set build type
-#set(CMAKE_BUILD_TYPE "Debug")
-set(CMAKE_BUILD_TYPE "Release")
+set(CMAKE_BUILD_TYPE "Debug")
+#set(CMAKE_BUILD_TYPE "Release")
 
 # Set board type
 #set(PICO_BOARD pico_w CACHE STRING "Board type")

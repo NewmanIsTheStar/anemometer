@@ -76,7 +76,7 @@ body {
               <td><input type="text" size="16" id="pwip" name="pwip" value="<!--#pwip-->"></td>
           </tr>
           <tr>
-              <td><label for="pwhost">Powerwall Hostname (TLS SNI)</label></td>
+              <td><label for="pwhost">Powerwall Server Name Indication</label></td>
               <td><input type="text" size="16" id="pwhost" name="pwhost" value="<!--#pwhost-->"></td>
           </tr>          
           <tr>

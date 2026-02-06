@@ -1303,96 +1303,110 @@ u16_t ssi_handler(int iIndex, char *pcInsert, int iInsertLen)
         break; 
         case SSI_calpge: //calpge
         {
-            switch(config.personality)
+            if (web.access_point_mode)
             {
-            default:
-            case NO_PERSONALITY:
-                //printf("redirecting to personality.shtml (%d)\n", config.personality);
-                printed = snprintf(pcInsert, iInsertLen, "/personality.shtml");
-                break;
-            case SPRINKLER_USURPER:
-                if (config.use_monday_as_week_start)
+                printed = snprintf(pcInsert, iInsertLen, "/network.shtml");
+            }
+            else
+            {
+                switch(config.personality)
                 {
-                    //printf("redirecting to landscape_monday.shtml\n");
-                    printed = snprintf(pcInsert, iInsertLen, "/landscape_monday.shtml");
+                default:
+                case NO_PERSONALITY:
+                    //printf("redirecting to personality.shtml (%d)\n", config.personality);
+                    printed = snprintf(pcInsert, iInsertLen, "/personality.shtml");
+                    break;
+                case SPRINKLER_USURPER:
+                    if (config.use_monday_as_week_start)
+                    {
+                        //printf("redirecting to landscape_monday.shtml\n");
+                        printed = snprintf(pcInsert, iInsertLen, "/landscape_monday.shtml");
+                    }
+                    else
+                    {
+                        //printf("redirecting to landscape.shtml\n");
+                        printed = snprintf(pcInsert, iInsertLen, "/landscape.shtml");
+                    }
+                    break;
+                case SPRINKLER_CONTROLLER:
+                    if (config.use_monday_as_week_start)
+                    {
+                        //printf("redirecting to landscape_monday.shtml\n");
+                        printed = snprintf(pcInsert, iInsertLen, "/zm_landscape.shtml");
+                    }
+                    else
+                    {
+                        //printf("redirecting to landscape.shtml\n");
+                        printed = snprintf(pcInsert, iInsertLen, "/zs_landscape.shtml");
+                    }
+                    break;                
+                case LED_STRIP_CONTROLLER:
+                    printed = snprintf(pcInsert, iInsertLen, "/led_controller.shtml");
+                    break;
+                case HVAC_THERMOSTAT:
+                    if (config.use_monday_as_week_start)
+                    {
+                        //printf("redirecting to landscape_monday.shtml\n");
+                        printed = snprintf(pcInsert, iInsertLen, "/tm_thermostat.shtml");
+                    }
+                    else
+                    {
+                        //printf("redirecting to landscape.shtml\n");
+                        printed = snprintf(pcInsert, iInsertLen, "/ts_thermostat.shtml");
+                    }            
+                    break;                
                 }
-                else
-                {
-                    //printf("redirecting to landscape.shtml\n");
-                    printed = snprintf(pcInsert, iInsertLen, "/landscape.shtml");
-                }
-                break;
-            case SPRINKLER_CONTROLLER:
-                if (config.use_monday_as_week_start)
-                {
-                    //printf("redirecting to landscape_monday.shtml\n");
-                    printed = snprintf(pcInsert, iInsertLen, "/zm_landscape.shtml");
-                }
-                else
-                {
-                    //printf("redirecting to landscape.shtml\n");
-                    printed = snprintf(pcInsert, iInsertLen, "/zs_landscape.shtml");
-                }
-                break;                
-            case LED_STRIP_CONTROLLER:
-                printed = snprintf(pcInsert, iInsertLen, "/led_controller.shtml");
-                break;
-            case HVAC_THERMOSTAT:
-                if (config.use_monday_as_week_start)
-                {
-                    //printf("redirecting to landscape_monday.shtml\n");
-                    printed = snprintf(pcInsert, iInsertLen, "/tm_thermostat.shtml");
-                }
-                else
-                {
-                    //printf("redirecting to landscape.shtml\n");
-                    printed = snprintf(pcInsert, iInsertLen, "/ts_thermostat.shtml");
-                }            
-                break;                
             }
         }                                                                                                                                                   
         break; 
         case SSI_porpge: //porpge
         {
-            switch(config.personality)
+            if (web.access_point_mode)
             {
-            default:
-            case NO_PERSONALITY:
-                printed = snprintf(pcInsert, iInsertLen, "/personality.shtml");
-                break;
-            case SPRINKLER_USURPER:
-                if (config.use_monday_as_week_start)
+                printed = snprintf(pcInsert, iInsertLen, "/network.shtml");
+            }
+            else
+            {            
+                switch(config.personality)
                 {
-                    printed = snprintf(pcInsert, iInsertLen, "/monday.shtml");
+                default:
+                case NO_PERSONALITY:
+                    printed = snprintf(pcInsert, iInsertLen, "/personality.shtml");
+                    break;
+                case SPRINKLER_USURPER:
+                    if (config.use_monday_as_week_start)
+                    {
+                        printed = snprintf(pcInsert, iInsertLen, "/monday.shtml");
+                    }
+                    else
+                    {
+                        printed = snprintf(pcInsert, iInsertLen, "/sunday.shtml");
+                    }
+                    break;
+                case SPRINKLER_CONTROLLER:
+                    if (config.use_monday_as_week_start)
+                    {
+                        printed = snprintf(pcInsert, iInsertLen, "/monday.shtml");
+                    }
+                    else
+                    {
+                        printed = snprintf(pcInsert, iInsertLen, "/sunday.shtml");
+                    }
+                    break;                
+                case LED_STRIP_CONTROLLER:
+                    printed = snprintf(pcInsert, iInsertLen, "/led_controller.shtml");
+                    break;
+                case HVAC_THERMOSTAT:
+                    if (config.use_monday_as_week_start)
+                    {
+                        printed = snprintf(pcInsert, iInsertLen, "/t_schedule.cgi?day=1");
+                    }
+                    else
+                    {
+                        printed = snprintf(pcInsert, iInsertLen, "/t_schedule.cgi?day=0");
+                    }            
+                    break;                
                 }
-                else
-                {
-                    printed = snprintf(pcInsert, iInsertLen, "/sunday.shtml");
-                }
-                break;
-            case SPRINKLER_CONTROLLER:
-                if (config.use_monday_as_week_start)
-                {
-                    printed = snprintf(pcInsert, iInsertLen, "/monday.shtml");
-                }
-                else
-                {
-                    printed = snprintf(pcInsert, iInsertLen, "/sunday.shtml");
-                }
-                break;                
-            case LED_STRIP_CONTROLLER:
-                printed = snprintf(pcInsert, iInsertLen, "/led_controller.shtml");
-                break;
-            case HVAC_THERMOSTAT:
-                if (config.use_monday_as_week_start)
-                {
-                    printed = snprintf(pcInsert, iInsertLen, "/t_schedule.cgi?day=1");
-                }
-                else
-                {
-                    printed = snprintf(pcInsert, iInsertLen, "/t_schedule.cgi?day=0");
-                }            
-                break;                
             }
         }                                                                                                                                                   
         break;        

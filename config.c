@@ -427,6 +427,8 @@ void config_v10_to_v11(void)
         config.setpoint_heating_temperaturex10[i] = 210;
         config.setpoint_cooling_temperaturex10[i] = 210;        
     }
+
+    config.thermostat_hysteresis = 10;
 }
 
 

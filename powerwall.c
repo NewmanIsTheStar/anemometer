@@ -164,7 +164,7 @@ void powerwall_poll(void)
             //printf("Resolving %s\n", PICOHTTPS_HOSTNAME);
             if(!resolve_hostname(&ipaddr))
             {
-                printf("Failed to resolve powerwall hostname = %s\n", PICOHTTPS_HOSTNAME);
+                printf("Failed to resolve powerwall host = %s\n", config.powerwall_ip);
                 break;
             } 
             else
@@ -526,7 +526,8 @@ bool resolve_hostname(ip_addr_t* ipaddr){
     // Attempt resolution
     cyw43_arch_lwip_begin();
     lwip_err_t lwip_err = dns_gethostbyname(
-        PICOHTTPS_HOSTNAME,
+        /*PICOHTTPS_HOSTNAME,*/
+        config.powerwall_ip,
         ipaddr,
         callback_gethostbyname,
         ipaddr

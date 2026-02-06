@@ -372,6 +372,8 @@ int ap_mode(void)
     dhcp_server_t dhcp_server;
     dns_server_t dns_server;    
 
+    web.access_point_mode = true;
+
     printf("Initializing AP mode\n");
     cyw43_arch_enable_ap_mode("pluto", "",	CYW43_AUTH_OPEN); 
 
@@ -400,7 +402,7 @@ int ap_mode(void)
         led_on = !led_on;
         
         // tell watchdog task that we are alive
-        //watchdog_pulse();
+        //watchdog_pulse();  // trade off -- allow more time before regular watchdog reboot vs. risk of never rebooting
 
         if (config_dirty(false))
         {
@@ -418,13 +420,13 @@ int ap_mode(void)
         {
             cyw43_arch_disable_ap_mode();
             cyw43_arch_deinit();
-
+            web.access_point_mode = false;
             watchdog_enable(1, 0);
         }
         else
         {
             // pat the watchdog
-            //watchdog_update();
+            //watchdog_update();  // trade off -- allow more time before regular watchdog reboot vs. risk of never rebooting
         }
         
         SLEEP_MS(100);
@@ -437,6 +439,7 @@ int ap_mode(void)
             cyw43_arch_disable_ap_mode();
             cyw43_arch_deinit();
 
+            web.access_point_mode = false;
             SLEEP_MS(100);
             
             watchdog_enable(1, 0);

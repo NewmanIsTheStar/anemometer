@@ -545,6 +545,11 @@ int accumulate_trailing_seven_day_total_rain(int daily_rain, int weekday)
  */
 int init_web_variables(void)
 {
+    // zero web structure
+    memset(&web, 0, sizeof(web));
+
+    web.access_point_mode = 0;
+    
     web.outside_temperature = 0;
     web.wind_speed = 0;
     web.daily_rain = 0;

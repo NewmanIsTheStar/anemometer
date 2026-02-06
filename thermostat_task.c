@@ -149,7 +149,7 @@ void thermostat_task(void *params)
             }
             
             // check powerwall status
-            powerwall_check();  // TODO:  DISABLED DUE TO UPGRADE to pico-sdk 2.2.0 which breaks https (mbedtls changes)
+            powerwall_check();
 
             // set hvac relays
             control_thermostat_relays(temperaturex10);
@@ -415,7 +415,14 @@ int thermostat_sanitize_user_config(void)
     CLIP(config.minimum_cooling_on_mins, 1, 60);
     CLIP(config.minimum_heating_off_mins, 1, 60);
     CLIP(config.minimum_cooling_off_mins, 1, 60);
-    CLIP(config.thermostat_hysteresis, 5, 50);
+    if (config.use_archaic_units)
+    {
+        CLIP(config.thermostat_hysteresis, 10, 100);  // 1 F to 10 F
+    }
+    else
+    {
+        CLIP(config.thermostat_hysteresis, 5, 50);   // 0.5 C to 5 C       
+    }
 
     return(0);
 }

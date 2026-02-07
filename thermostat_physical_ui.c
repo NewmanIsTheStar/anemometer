@@ -323,6 +323,7 @@ THERMOSTAT_MODE_T get_front_panel_mode(void)
     return (stable_mode);
 }
 
+//TODO: allow user to set pins back to "none"in UI and disable display.  Also investigate why display fails to initialize when pins are defined (without a reboot).
 int thermostat_display_initialize(void)
 {
     int err = 0;

@@ -547,7 +547,7 @@ void vTimerCallback(TimerHandle_t xTimer)
     int err = 0;
     int i;
 
-    if (relay_gpio_enable)
+    if (relay_gpio_ok)
     {
         // create hvac timers
         for (i=0; i < NUM_HVAC_TIMERS; i++)
@@ -564,36 +564,13 @@ void vTimerCallback(TimerHandle_t xTimer)
 
         gpio_init(config.cooling_gpio);
         gpio_put(config.cooling_gpio, 0);
-        gpio_set_dir(config.cooling_gpio, true);  
+        gpio_set_dir(config.cooling_gpio, true); 
         
         gpio_init(config.fan_gpio);
         gpio_put(config.fan_gpio, 0);
         gpio_set_dir(config.fan_gpio, true);
 
         err = 0;
-
-        // // check hvac gpios are valid
-        // if (gpio_valid(config.heating_gpio) && gpio_valid(config.cooling_gpio) && gpio_valid(config.fan_gpio))
-        // {    
-        //     // check hvac gpios are unique
-        //     if ((config.heating_gpio != config.cooling_gpio) &&
-        //         (config.heating_gpio != config.fan_gpio) &&
-        //         (config.cooling_gpio != config.fan_gpio))
-        //     {
-        //         //initialize hvac gpios
-        //         gpio_init(config.heating_gpio);
-        //         gpio_put(config.heating_gpio, 0);
-        //         gpio_set_dir(config.heating_gpio, true);
-
-        //         gpio_init(config.cooling_gpio);
-        //         gpio_put(config.cooling_gpio, 0);
-        //         gpio_set_dir(config.cooling_gpio, true);  
-                
-        //         gpio_init(config.fan_gpio);
-        //         gpio_put(config.fan_gpio, 0);
-        //         gpio_set_dir(config.fan_gpio, true);
-        //     }  
-        // }
     }
     else
     {

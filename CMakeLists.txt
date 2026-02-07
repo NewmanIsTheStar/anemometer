@@ -5,8 +5,8 @@ cmake_minimum_required(VERSION 3.13..3.27)
 set(APP_VERSION "01.00.03")
 
 # Set build type
-set(CMAKE_BUILD_TYPE "Debug")
-#set(CMAKE_BUILD_TYPE "Release")
+# set(CMAKE_BUILD_TYPE "Debug")
+set(CMAKE_BUILD_TYPE "Release")
 
 # Set board type
 #set(PICO_BOARD pico_w CACHE STRING "Board type")
@@ -164,9 +164,9 @@ pico_generate_pio_header(thermostat ${CMAKE_CURRENT_LIST_DIR}/tm1637.pio OUTPUT_
 pico_set_program_name(thermostat "thermostat")
 pico_set_program_version(thermostat ${APP_VERSION})
 
-# enable/disable output over UART/USB
+# enable/disable output over UART/USB  ***TODO: had to disable stdio over usb in Release builds as it causes random crashes/resets during startup
 if(CMAKE_BUILD_TYPE STREQUAL "Release")
-        pico_enable_stdio_usb(thermostat 1)
+        pico_enable_stdio_usb(thermostat 0)
         pico_enable_stdio_uart(thermostat 0)        
 else() 
         pico_enable_stdio_usb(thermostat 0)

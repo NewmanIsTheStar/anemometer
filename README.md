@@ -1,9 +1,9 @@
-# Thermostat
+# Anemometer
 
 ## Description
-Thermostat for ordinary residential central heating and cooling systems based on Raspberry Pi Pico2 W. 
-- Provides a web inteface for configuration.
-- Supports monitoring Tesla Powerwall 2 to control power consumption during grid failure.
+Gives remote access to anemometer wind speed readings.  Based on Raspberry Pi Pico2 W. 
+- Provides a web inteface for configuration and monitoring the wind speed.
+- Provides a UDP based interface for programatic access to wind speed from remote devices.
 
 ## Installation of tools on Ubuntu Linux
 ```
@@ -11,14 +11,14 @@ sudo apt install git build-essential cmake gcc-arm-none-eabi libnewlib-arm-none-
 ```
 ## Clone and build the code
 ```
-git clone --recurse-submodules https://github.com/NewmanIsTheStar/thermostat.git
-cd thermostat
+git clone --recurse-submodules https://github.com/NewmanIsTheStar/anemometer.git
+cd anemometer
 mkdir build
 cd build
 cmake ..
 make
 ```
-Upon completion of a successful build the file thermostat.uf2 should be created.  This may be loaded onto the Pico2 W by dragging and dropping in the usual manner.
+Upon completion of a successful build the file anemometer.uf2 should be created.  This may be loaded onto the Pico2 W by dragging and dropping in the usual manner.
 
 ## Initial Configuration
 - The Pico will initially create a WiFi network called **pluto**.  Connect to this WiFi network and then point your web browser to http://192.168.4.1
@@ -28,10 +28,8 @@ Upon completion of a successful build the file thermostat.uf2 should be created.
 
 ## Hardware
 - Raspberry Pi Pico2 W
-- Raspberry Pi Pico Relay Board (with at least 3 relays)
-- AHT10 temperature sensor
-- Seven Segment Display (4 digit or 6 digit)
-- Momentary Push buttons (3)
+- Anemomter
+- A couple of resistors may be required to adapt the anemometer output to the Pi Pico2 W GPIO voltage range
 
 ## Licenses
 - SPDX-License-Identifier: BSD-3-Clause

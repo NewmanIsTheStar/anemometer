@@ -18,7 +18,7 @@
 #include "weather.h"
 #include "led_strip.h"
 #include "message.h"
-#include "thermostat.h"
+#include "anemometer.h"
 #include "hc_task.h"
 #include "discovery_task.h"
 
@@ -26,8 +26,8 @@
 WORKER_TASK_T worker_tasks[] =
 {
     //  function        name                    stack   priority        
-#ifdef INCORPORATE_THERMOSTAT    
-    {   thermostat_task,"Thermostat Task",      8096,   5},       
+#ifdef INCORPORATE_ANEMOMETER    
+    {   anemometer_task,"Anemometer Task",      8096,   5},       
 #endif
 
     // end of table

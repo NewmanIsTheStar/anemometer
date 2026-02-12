@@ -2,11 +2,11 @@ cmake_minimum_required(VERSION 3.13..3.27)
 
 # ====================================================================================
 # Set release version
-set(APP_VERSION "01.00.03")
+set(APP_VERSION "01.00.04")
 
 # Set build type
-# set(CMAKE_BUILD_TYPE "Debug")
-set(CMAKE_BUILD_TYPE "Release")
+set(CMAKE_BUILD_TYPE "Debug")
+#set(CMAKE_BUILD_TYPE "Release")
 
 # Set board type
 #set(PICO_BOARD pico_w CACHE STRING "Board type")
@@ -48,7 +48,7 @@ add_compile_definitions(FAKE_RTC)
 include(pico-sdk/pico_sdk_init.cmake)
 
 # set the project name ${PROJECT_NAME}
-project(thermostat C CXX ASM)
+project(anemometer C CXX ASM)
 
 # Initialise the Raspberry Pi Pico SDK
 pico_sdk_init()
@@ -123,57 +123,50 @@ set(pluto_link_libraries
 
 
 # pico_w has insufficent RAM to incorporate HTTPS web client (thus tesla powerwall monitoring is disabled on pico_w)
-if(NOT PICO_BOARD STREQUAL "pico_w")
-        set(pluto_link_libraries ${pluto_link_libraries}        
-                pico_lwip_mbedtls
-                pico_mbedtls)        
-endif()
+# if(NOT PICO_BOARD STREQUAL "pico_w")
+#         set(pluto_link_libraries ${pluto_link_libraries}        
+#                 pico_lwip_mbedtls
+#                 pico_mbedtls)        
+# endif()
 
 
 # ====================================================================================
-# Thermostat
+# Anemometer
 
-message("Creating HTML binary blob for THERMOSTAT")
+message("Creating HTML binary blob for ANEMOMETER")
 execute_process(COMMAND
         ../makefsdata.py
-        WORKING_DIRECTORY ${CMAKE_CURRENT_LIST_DIR}/thermostat/
+        WORKING_DIRECTORY ${CMAKE_CURRENT_LIST_DIR}/anemometer/
         )
 
 if(NOT PICO_BOARD STREQUAL "pico_w")
-        set(thermostat_source_files ${common_source_files}
-                thermostat/worker_tasks.c        
-                thermostat_task.c
-                thermostat_aht10.c
-                thermostat_metrics.c
-                thermostat_physical_ui.c
-                thermostat_web_ui.c
-                thermostat_hvac.c
-                powerwall.c
-                json_parser.c
-                tm1637.c)        
+        set(anemometer_source_files ${common_source_files}
+                anemometer/worker_tasks.c        
+                anemometer_task.c
+           )        
 endif()  
 
-add_executable(thermostat ${thermostat_source_files})  
-target_compile_definitions(thermostat PRIVATE APP_NAME="Thermostat" HTTPD_FSDATA_FILE="thermostat/htmldata.c")
+add_executable(anemometer ${anemometer_source_files})  
+target_compile_definitions(anemometer PRIVATE APP_NAME="Anemometer" HTTPD_FSDATA_FILE="anemometer/htmldata.c")
 if(NOT PICO_BOARD STREQUAL "pico_w") 
-target_compile_definitions(thermostat PRIVATE INCORPORATE_THERMOSTAT)
+target_compile_definitions(anemometer PRIVATE INCORPORATE_ANEMOMETER)
 endif()
 
-pico_generate_pio_header(thermostat ${CMAKE_CURRENT_LIST_DIR}/tm1637.pio OUTPUT_DIR ${CMAKE_CURRENT_LIST_DIR}/generated)
+pico_generate_pio_header(anemometer ${CMAKE_CURRENT_LIST_DIR}/tm1637.pio OUTPUT_DIR ${CMAKE_CURRENT_LIST_DIR}/generated)
 
-pico_set_program_name(thermostat "thermostat")
-pico_set_program_version(thermostat ${APP_VERSION})
+pico_set_program_name(anemometer "anemometer")
+pico_set_program_version(anemometer ${APP_VERSION})
 
 # enable/disable output over UART/USB  ***TODO: had to disable stdio over usb in Release builds as it causes random crashes/resets during startup
 if(CMAKE_BUILD_TYPE STREQUAL "Release")
-        pico_enable_stdio_usb(thermostat 0)
-        pico_enable_stdio_uart(thermostat 0)        
+        pico_enable_stdio_usb(anemometer 0)
+        pico_enable_stdio_uart(anemometer 0)        
 else() 
-        pico_enable_stdio_usb(thermostat 0)
-        pico_enable_stdio_uart(thermostat 1)        
+        pico_enable_stdio_usb(anemometer 0)
+        pico_enable_stdio_uart(anemometer 1)        
 endif()
 
-target_include_directories(thermostat PRIVATE
+target_include_directories(anemometer PRIVATE
         ${CMAKE_CURRENT_LIST_DIR}
         ${CMAKE_CURRENT_LIST_DIR}/pico-sdk/lib/lwip/contrib/ports/freertos/include/ 
         if(PICO_BOARD STREQUAL "pico_w")
@@ -190,12 +183,10 @@ target_include_directories(thermostat PRIVATE
         ${CMAKE_CURRENT_LIST_DIR}/pico-sdk/lib/lwip/contrib/apps/ping/
         )
 
-target_link_libraries(thermostat ${pluto_link_libraries})
-
-#pico_set_linker_script(thermostat ${CMAKE_CURRENT_LIST_DIR}/memmap_thermostat_hi.ld)
+target_link_libraries(anemometer ${pluto_link_libraries})
 
 # create uf2 
-pico_add_extra_outputs(thermostat)
+pico_add_extra_outputs(anemometer)
 
 
 

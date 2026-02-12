@@ -22,7 +22,9 @@
 #include "thermostat.h"
 
 #include "pluto.h"
+#ifdef INCORPORATE_THERMOSTAT  
 #include "powerwall.h"
+#endif
 #include "led_strip.h"
 
 #ifdef USE_GIT_HASH_AS_VERSION

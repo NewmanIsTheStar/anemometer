@@ -119,7 +119,8 @@ set(pluto_link_libraries
         FreeRTOS-Kernel-Heap4
         pico_flash
         hardware_pio
-        hardware_i2c)
+        hardware_i2c
+        hardware_adc)
 
 
 # pico_w has insufficent RAM to incorporate HTTPS web client (thus tesla powerwall monitoring is disabled on pico_w)

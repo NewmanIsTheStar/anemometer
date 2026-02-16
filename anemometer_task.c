@@ -13,6 +13,7 @@
 #include "hardware/watchdog.h"
 #include <hardware/flash.h>
 #include "hardware/i2c.h"
+#include "hardware/adc.h"
 
 #include "lwip/netif.h"
 #include "lwip/ip4_addr.h"
@@ -96,6 +97,7 @@ void anemometer_task(void *params)
     int oneshot = false;
     int i;
     bool button_pressed = false;
+    uint16_t result;
 
     if (strcasecmp(APP_NAME, "Thermostat") == 0)
     {
@@ -115,66 +117,25 @@ void anemometer_task(void *params)
 
     // // create the schedule grid used in web inteface
     // make_schedule_grid();
+
+    // Initialize the ADC
+    adc_init();
+
+    // Enable the ADC pin (GPIO26 is channel 0)
+    adc_gpio_init(26);
+    
+    // Select ADC input channel 0 (GPIO26)
+    adc_select_input(0);    
      
     while (true)
     {
-    //     if ((config.personality == HVAC_THERMOSTAT))  // TODO should this be config.anemometer_enable ?
-    //     {
-    //         // check user configured gpios
-    //         anemometer_validate_gpio_set();
-            
-    //         // initialize all subsystems that are not already up
-    //         anemometer_initialize();
+        // Read the raw ADC value
+        result = adc_read();
+        
+        // Print the value to the console
+        printf("Raw ADC value: %u\n", result);
 
-    //         // measure temperature
-    //         ath10_error = aht10_measurement(&temperaturex10, &humidityx10);
-
-    //         if (ath10_error)
-    //         {
-    //             printf("aht10: i2c error occured will attempt soft reset\n");              
-    //             anemometer_deinitialize(anemometer_initialize_temperature_sensor);
-    //             temperaturex10 = TEMPERATURE_INVALID;
-    //         }
-    //         else
-    //         {                
-    //             // record history
-    //             accumlate_metrics(unix_time, temperaturex10, humidityx10);
-    //             log_climate_change(temperaturex10, humidityx10);
-    //             track_hvac_extrema(COOLING_LAG, temperaturex10);
-    //             track_hvac_extrema(HEATING_LAG, temperaturex10);                 
-
-    //             // update web ui
-    //             //web.anemometer_temperature = filter_temperature_noise(temperaturex10);
-    //             // web.anemometer_temperature = temperaturex10;
-    //         }
-            
-    //         // check powerwall status
-    //         // powerwall_check();
-
-    //         // set hvac relays
-    //         // control_anemometer_relays(temperaturex10);
-
-    //         if (buttons_initialized)
-    //         {
-    //             // process button presses until a period of inactivity occurs
-    //             button_pressed = handle_button_press_with_timeout(ANEMOMETER_TASK_LOOP_DELAY);
-    //         }
-    //         else
-    //         {
-    //             SLEEP_MS(ANEMOMETER_TASK_LOOP_DELAY); 
-    //         }
-
-    //         // update web schedule
-    //         make_schedule_grid();
-    //     }
-    //     else
-    //     {
-    //         SLEEP_MS(60000); 
-    //     }   
-
-
-        printf("anemometeris alive!\n");
-        SLEEP_MS(10000);
+        SLEEP_MS(1000);
 
         // tell watchdog task that we are still alive
         watchdog_pulse((int *)params);               

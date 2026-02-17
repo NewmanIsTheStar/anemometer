@@ -1047,14 +1047,24 @@ bool terminate_irrigation_due_to_weather (void)
     long temp;
     char reason[100];
     int reason_index = 0;
+    int input_wind_speed = 0;
 
-    //TODO -- ignore missing measurements (e.g set to threshold is value unknown)
+    //TODO -- ignore missing measurements (e.g set to threshold if value unknown)
+
+    if (config.anemometer_remote_enable)
+    {
+        input_wind_speed = web.anemometer_wind_speed;
+    }
+    else
+    {
+        input_wind_speed = web.wind_speed;
+    }
 
     // convert current measurements to archaic units if necessary
     switch(config.use_archaic_units)
     {
     case true:
-        wind_speed = (web.wind_speed*3281 + 500)/1000;                 // feet per second
+        wind_speed = (input_wind_speed*3281 + 500)/1000;               // feet per second
         rain_week = (10*web.trailing_seven_days_rain + 127)/254;       // inches
         rain_day = (10*web.daily_rain + 127)/254;                      // inches
         soil_moisture = web.soil_moisture[0];                          // percentage    
@@ -1064,7 +1074,7 @@ bool terminate_irrigation_due_to_weather (void)
         
     default:
     case false:
-        wind_speed = web.wind_speed;                      // m/s
+        wind_speed = input_wind_speed;                    // m/s
         rain_week = web.trailing_seven_days_rain;         // mm   
         rain_day = web.daily_rain;                        // mm      
         soil_moisture = web.soil_moisture[0];             // percentage

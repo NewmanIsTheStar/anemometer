@@ -806,14 +806,23 @@ u16_t ssi_handler(int iIndex, char *pcInsert, int iInsertLen)
         }
         break;
         case SSI_wind: // wind
-        {         
+        {
+            if (config.anemometer_remote_enable)
+            {
+                i = web.anemometer_wind_speed;
+            }         
+            else
+            {
+                i = web.wind_speed;
+            }
+
             if (!config.use_archaic_units)
             {
-                printed = snprintf(pcInsert, iInsertLen, "%d.%d", web.wind_speed/10, web.wind_speed%10); 
+                printed = snprintf(pcInsert, iInsertLen, "%d.%d", i/10, i%10); 
             }
             else
             {
-                temp = (web.wind_speed*3281 + 500)/1000;
+                temp = (i*3281 + 500)/1000;
                 printed = snprintf(pcInsert, iInsertLen, "%ld.%ld", temp/10, temp%10);
             }              
         } 

@@ -25,6 +25,7 @@
 // worker tasks to launch and monitor
 WORKER_TASK_T worker_tasks[] =
 {
+    {   message_task,   "Message Task",         1024,   1},  
     //  function        name                    stack   priority        
 #ifdef INCORPORATE_ANEMOMETER    
     {   anemometer_task,"Anemometer Task",      8096,   5},       

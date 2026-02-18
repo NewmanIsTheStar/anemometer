@@ -151,7 +151,7 @@ void anemometer_task(void *params)
         range_of_adc_readings = highest_adc_reading - lowest_adc_reading;
 
         // wind speed = (I-4)/16*A+B  where I = current in mA, A = wind speed range (0 to 45m/s), B = lowest wind speed (0.8 m/s)
-        web.anemometer_wind_speed = ((((result - lowest_adc_reading)*100)/highest_adc_reading)*45 + 80)/10;
+        web.anemometer_wind_speed = ((((result - lowest_adc_reading)*100)/range_of_adc_readings)*45 + 80)/10;
         printf("Wind Speed = %c%ld.%ld m/s\n", web.anemometer_wind_speed<0?'-':' ', abs(web.anemometer_wind_speed)/10, abs(web.anemometer_wind_speed%10));
         SLEEP_MS(1000);
 

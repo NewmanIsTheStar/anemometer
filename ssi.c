@@ -736,7 +736,9 @@ extern NON_VOL_VARIABLES_T config;
     x(ttma)      \
     x(ttgrd)     \
     x(ttpred)    \
-    x(disdig)
+    x(disdig)    \
+    x(anip)      \
+    x(anen)
 
   
 //enum used to index array of pointers to SSI string constants  e.g. index 0 is SSI_usurped
@@ -2772,7 +2774,17 @@ u16_t ssi_handler(int iIndex, char *pcInsert, int iInsertLen)
         }
         break;           
         
-#endif                                        
+#endif
+        case SSI_anip: // anemometer ip address           
+        {
+            printed = snprintf(pcInsert, iInsertLen, "%s", config.anemometer_remote_ip); 
+        }       
+        case SSI_anen: // anemometer enable
+        {
+            printed = snprintf(pcInsert, iInsertLen, "%s", config.anemometer_remote_enable?"checked":""); 
+        }
+        break;   
+                                         
         default:
         {
             printed = snprintf(pcInsert, iInsertLen, "Unhandled SSI tag");    

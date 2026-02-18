@@ -98,6 +98,9 @@ void anemometer_task(void *params)
     int i;
     bool button_pressed = false;
     uint16_t result;
+    int lowest_adc_reading = 819;
+    int highest_adc_reading = 3277;
+    int range_of_adc_readings = 3277 - 819;
 
     if (strcasecmp(APP_NAME, "Thermostat") == 0)
     {
@@ -133,8 +136,23 @@ void anemometer_task(void *params)
         result = adc_read();
         
         // Print the value to the console
-        printf("Raw ADC value: %u\n", result);
+        printf("Raw ADC value: %u\t", result);
 
+        if (result > highest_adc_reading)
+        {
+            highest_adc_reading = result;
+        }
+
+        if (result < lowest_adc_reading)
+        {
+            lowest_adc_reading = result;
+        }
+
+        range_of_adc_readings = highest_adc_reading - lowest_adc_reading;
+
+        // wind speed = (I-4)/16*A+B  where I = current in mA, A = wind speed range (0 to 45m/s), B = lowest wind speed (0.8 m/s)
+        web.anemometer_wind_speed = ((((result - lowest_adc_reading)*100)/highest_adc_reading)*45 + 80)/10;
+        printf("Wind Speed = %c%ld.%ld m/s\n", web.anemometer_wind_speed<0?'-':' ', abs(web.anemometer_wind_speed)/10, abs(web.anemometer_wind_speed%10));
         SLEEP_MS(1000);
 
         // tell watchdog task that we are still alive

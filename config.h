@@ -23,6 +23,7 @@ typedef enum
     LED_STRIP_CONTROLLER       =   2,             // allows remote control of an led strip
     HVAC_THERMOSTAT            =   3,             // wifi confrolled thermostat
     HOME_CONTROLLER            =   4,             // home controller
+    ANEMOMETER                 =   5,             // anemometer
     
     NO_PERSONALITY             =   4294967295     // force enum to be 4 bytes long 
 } PERSONALITY_E;

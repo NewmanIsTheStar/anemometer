@@ -10,12 +10,13 @@
 
 <script>
     function load_page() {
-        if(screen.availHeight > screen.availWidth){
-            window.location = "<!--#porpge-->"; 
-        }
-        else {
-            window.location = "<!--#calpge-->";
-        }
+        // if(screen.availHeight > screen.availWidth){
+        //     window.location = "<!--#porpge-->"; 
+        // }
+        // else {
+        //     window.location = "<!--#calpge-->";
+        // }
+        window.location = "/status.shtml";
     }
 </script>
 

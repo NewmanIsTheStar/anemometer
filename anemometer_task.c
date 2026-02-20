@@ -102,24 +102,14 @@ void anemometer_task(void *params)
     int highest_adc_reading = 3277;
     int range_of_adc_readings = 3277 - 819;
 
-    if (strcasecmp(APP_NAME, "Thermostat") == 0)
+    if (strcasecmp(APP_NAME, "Anemometer") == 0)
     {
         // single purpose application -- force personality and enable
-        config.personality = HVAC_THERMOSTAT;
-        // config.anemometer_enable = 1;
+        config.personality = ANEMOMETER;
+        //config.anemometer_enable = 1;
     }
 
     printf("anemometer_task started!\n");
-
-    // // set initial status
-    // // temperaturex10 = anemometer_get_default_temperature();   
-    // // web.powerwall_grid_status = GRID_UNKNOWN;
-
-    // // check and correct critical user configuration settings
-    // anemometer_sanitize_user_config();
-
-    // // create the schedule grid used in web inteface
-    // make_schedule_grid();
 
     // Initialize the ADC
     adc_init();
@@ -130,6 +120,8 @@ void anemometer_task(void *params)
     // Select ADC input channel 0 (GPIO26)
     adc_select_input(0);    
      
+    sprintf(web.stack_message, "Measuring wind speed");
+
     while (true)
     {
         // Read the raw ADC value
@@ -148,11 +140,16 @@ void anemometer_task(void *params)
             lowest_adc_reading = result;
         }
 
+        // update web interface
+        web.anemometer_adc_max = highest_adc_reading;
+        web.anemometer_adc_min = lowest_adc_reading;
+
         range_of_adc_readings = highest_adc_reading - lowest_adc_reading;
 
         // wind speed = (I-4)/16*A+B  where I = current in mA, A = wind speed range (0 to 45m/s), B = lowest wind speed (0.8 m/s)
         web.anemometer_wind_speed = ((((result - lowest_adc_reading)*100)/range_of_adc_readings)*45 + 80)/10;
         printf("Wind Speed = %c%ld.%ld m/s\n", web.anemometer_wind_speed<0?'-':' ', abs(web.anemometer_wind_speed)/10, abs(web.anemometer_wind_speed%10));
+
         SLEEP_MS(1000);
 
         // tell watchdog task that we are still alive

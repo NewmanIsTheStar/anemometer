@@ -69,7 +69,7 @@ body {
   </div>
 
 <div class="main">
-  <h2>Status</h2>  
+  <h2>Anemometer Status</h2>  
   <table>
     <tr>
       <td font-weight: bold; colspan="2"><!--#status--></td>
@@ -82,32 +82,17 @@ body {
       <td><!--#ltme--></td>
     </tr>
     <tr>
-      <td>Temperature</td>
-      <td><!--#tct--> &deg;<!--#tmpu--></td>      
+      <td>Wind Speed</td>
+      <td><!--#wind--> <!--#spdu--></td>            
     </tr>
     <tr>
-      <td>Set point</td>
-      <td><!--#tcs--> &deg;<!--#tmpu--></td>
+      <td>ADC Minimum</td>
+      <td><!--#adcmin--></td>
     </tr>
     <tr>
-      <td>Heating target</td>
-      <td><!--#tchs--></td>
+      <td>ADC Maximum</td>
+      <td><!--#adcmax--></td>
     </tr>    
-    <tr>
-      <td>Cooling target</td>
-      <td><!--#tccs--></td>
-    </tr>  
-    <tr>
-      <td colspan="2">&nbsp;</td> 
-    </tr>     
-    <tr>
-      <td>Grid Status</td>
-      <td><!--#grids--></td>
-    </tr> 
-    <tr>
-      <td>Battery</td>
-      <td><!--#batp--> %</td>
-    </tr> 
     <tr>
       <td colspan="2">&nbsp;</td> 
     </tr>     

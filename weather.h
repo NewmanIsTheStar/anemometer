@@ -225,6 +225,8 @@ typedef struct WEB_VARIABLES
   int thermostat_temperature_prediction;
   THERMOSTAT_MODE_T thermostat_effective_mode;
   int anemometer_wind_speed;
+  int anemometer_adc_min;
+  int anemometer_adc_max;
 } WEB_VARIABLES_T;                  //remember to add initialization code when adding to this structure !!!
 
 #endif

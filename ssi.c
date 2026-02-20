@@ -738,7 +738,9 @@ extern NON_VOL_VARIABLES_T config;
     x(ttpred)    \
     x(disdig)    \
     x(anip)      \
-    x(anen)
+    x(anen)      \
+    x(adcmin)    \
+    x(adcmax)    
 
   
 //enum used to index array of pointers to SSI string constants  e.g. index 0 is SSI_usurped
@@ -809,7 +811,7 @@ u16_t ssi_handler(int iIndex, char *pcInsert, int iInsertLen)
         break;
         case SSI_wind: // wind
         {
-            if (config.anemometer_remote_enable)
+            if ((config.anemometer_remote_enable) || (config.personality == ANEMOMETER))
             {
                 i = web.anemometer_wind_speed;
             }         
@@ -1368,6 +1370,9 @@ u16_t ssi_handler(int iIndex, char *pcInsert, int iInsertLen)
                         printed = snprintf(pcInsert, iInsertLen, "/ts_thermostat.shtml");
                     }            
                     break;                
+                case ANEMOMETER:
+                    printed = snprintf(pcInsert, iInsertLen, "/status.shtml");
+                    break;                    
                 }
             }
         }                                                                                                                                                   
@@ -1418,7 +1423,10 @@ u16_t ssi_handler(int iIndex, char *pcInsert, int iInsertLen)
                     {
                         printed = snprintf(pcInsert, iInsertLen, "/t_schedule.cgi?day=0");
                     }            
-                    break;                
+                    break;   
+                case ANEMOMETER:
+                    printed = snprintf(pcInsert, iInsertLen, "/status.shtml");
+                    break;                                    
                 }
             }
         }                                                                                                                                                   
@@ -1790,7 +1798,10 @@ u16_t ssi_handler(int iIndex, char *pcInsert, int iInsertLen)
                 break;     
             case HOME_CONTROLLER:
                 printed = snprintf(pcInsert, iInsertLen, "Home Controller");
-                break;                                             
+                break;     
+            case ANEMOMETER:
+                printed = snprintf(pcInsert, iInsertLen, "Anemometer");
+                break;                                                          
             default:
             case NO_PERSONALITY:
                 printed = snprintf(pcInsert, iInsertLen, "No personality");
@@ -2785,7 +2796,16 @@ u16_t ssi_handler(int iIndex, char *pcInsert, int iInsertLen)
             printed = snprintf(pcInsert, iInsertLen, "%s", config.anemometer_remote_enable?"checked":""); 
         }
         break;   
-                                         
+        case SSI_adcmin: // adc minimum value           
+        {
+            printed = snprintf(pcInsert, iInsertLen, "%d", web.anemometer_adc_min); 
+        }
+        break;
+        case SSI_adcmax: // adc maximum value           
+        {
+            printed = snprintf(pcInsert, iInsertLen, "%d", web.anemometer_adc_max); 
+        }
+        break;                                                   
         default:
         {
             printed = snprintf(pcInsert, iInsertLen, "Unhandled SSI tag");    

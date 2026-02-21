@@ -44,6 +44,8 @@
 #include "pluto.h"
 // #include "tm1637.h"
 
+#define WIND_SPEED_MOVING_AVERAGE_NUM_SAMPLES (3)
+
 // typdedefs
 typedef struct
 {
@@ -59,6 +61,7 @@ int anemometer_initialize_buttons(void);
 int anemometer_initialize_temperature_sensor(void);
 int anemometer_validate_gpio_set(void);
 long int anemometer_get_default_temperature(void);
+int anemometer_get_moving_average_wind_speed(int instantaneous_wind_speed);
 
 // external variables
 extern uint32_t unix_time;
@@ -99,8 +102,8 @@ void anemometer_task(void *params)
     bool button_pressed = false;
     uint16_t result;
     int lowest_adc_reading = 819;
-    int highest_adc_reading = 3277;
-    int range_of_adc_readings = 3277 - 819;
+    int highest_adc_reading = 4095;
+    int range_of_adc_readings = 4095 - 819;
 
     if (strcasecmp(APP_NAME, "Anemometer") == 0)
     {
@@ -116,9 +119,11 @@ void anemometer_task(void *params)
 
     // Enable the ADC pin (GPIO26 is channel 0)
     adc_gpio_init(26);
+    //adc_gpio_init(27);
     
     // Select ADC input channel 0 (GPIO26)
-    adc_select_input(0);    
+    adc_select_input(0); 
+    //adc_select_input(1);       
      
     sprintf(web.stack_message, "Measuring wind speed");
 
@@ -146,8 +151,21 @@ void anemometer_task(void *params)
 
         range_of_adc_readings = highest_adc_reading - lowest_adc_reading;
 
-        // wind speed = (I-4)/16*A+B  where I = current in mA, A = wind speed range (0 to 45m/s), B = lowest wind speed (0.8 m/s)
-        web.anemometer_wind_speed = ((((result - lowest_adc_reading)*100)/range_of_adc_readings)*45 + 80)/10;
+
+        if (result < 819)
+        {
+            // at or below minimum measurable wind speed
+            web.anemometer_wind_speed = 0;
+        }
+        else
+        {
+            // wind speed = (I-4)/16*A+B  where I = current in mA, A = wind speed range (0 to 45m/s), B = lowest wind speed (0.8 m/s)
+            web.anemometer_wind_speed = ((((result - lowest_adc_reading)*100)/range_of_adc_readings)*45 + 80)/10;            
+        }
+
+        // compute moving average
+        web.anemometer_wind_speed = anemometer_get_moving_average_wind_speed(web.anemometer_wind_speed);
+
         printf("Wind Speed = %c%ld.%ld m/s\n", web.anemometer_wind_speed<0?'-':' ', abs(web.anemometer_wind_speed)/10, abs(web.anemometer_wind_speed%10));
 
         SLEEP_MS(1000);
@@ -405,4 +423,38 @@ int anemometer_sanitize_user_config(void)
     // }
 
     return(0);
+}
+
+/*!
+ * \brief Monitor temperature and control hvac system based on schedule
+ *
+ * \param params unused garbage
+ * 
+ * \return nothing
+ */
+int anemometer_get_moving_average_wind_speed(int instantaneous_wind_speed)
+{
+    static int wind_speed_sample[WIND_SPEED_MOVING_AVERAGE_NUM_SAMPLES];
+    static int wind_speed_sample_index = 0;
+    static int wind_speed_sample_population = 0;
+    int moving_average_wind_speed = 0;
+    int i;
+
+    wind_speed_sample[wind_speed_sample_index] = instantaneous_wind_speed;
+    wind_speed_sample_index = (wind_speed_sample_index+1)%WIND_SPEED_MOVING_AVERAGE_NUM_SAMPLES;
+
+    if (wind_speed_sample_population < WIND_SPEED_MOVING_AVERAGE_NUM_SAMPLES)
+    {
+        wind_speed_sample_population++;
+    }
+
+    for (i = 0; i < wind_speed_sample_population; i++)
+    {
+       moving_average_wind_speed += wind_speed_sample[i];
+    }
+
+    // compute moving average
+    moving_average_wind_speed = moving_average_wind_speed/wind_speed_sample_population;
+
+    return(moving_average_wind_speed);
 }

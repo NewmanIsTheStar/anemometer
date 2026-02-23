@@ -1,7 +1,7 @@
 # Anemometer
 
 ## Description
-Gives remote access to anemometer wind speed readings.  Based on Raspberry Pi Pico2 W. 
+Gives remote access to anemometer wind speed readings.  Based on either Raspberry Pi Pico W or Pico2 W. 
 - Provides a web inteface for configuration and monitoring the wind speed.
 - Provides a UDP based interface for programatic access to wind speed from remote devices.
 

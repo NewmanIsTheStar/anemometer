@@ -9,8 +9,8 @@ set(CMAKE_BUILD_TYPE "Debug")
 #set(CMAKE_BUILD_TYPE "Release")
 
 # Set board type
-#set(PICO_BOARD pico_w CACHE STRING "Board type")
-set(PICO_BOARD pico2_w CACHE STRING "Board type")
+set(PICO_BOARD pico_w CACHE STRING "Board type")
+#set(PICO_BOARD pico2_w CACHE STRING "Board type")
 # ====================================================================================
 
 set(CMAKE_C_STANDARD 11)
@@ -140,18 +140,18 @@ execute_process(COMMAND
         WORKING_DIRECTORY ${CMAKE_CURRENT_LIST_DIR}/anemometer/
         )
 
-if(NOT PICO_BOARD STREQUAL "pico_w")
+#if(NOT PICO_BOARD STREQUAL "pico_w")
         set(anemometer_source_files ${common_source_files}
                 anemometer/worker_tasks.c        
                 anemometer_task.c
            )        
-endif()  
+#endif()  
 
 add_executable(anemometer ${anemometer_source_files})  
 target_compile_definitions(anemometer PRIVATE APP_NAME="Anemometer" HTTPD_FSDATA_FILE="anemometer/htmldata.c")
-if(NOT PICO_BOARD STREQUAL "pico_w") 
+#if(NOT PICO_BOARD STREQUAL "pico_w") 
 target_compile_definitions(anemometer PRIVATE INCORPORATE_ANEMOMETER)
-endif()
+#endif()
 
 pico_generate_pio_header(anemometer ${CMAKE_CURRENT_LIST_DIR}/tm1637.pio OUTPUT_DIR ${CMAKE_CURRENT_LIST_DIR}/generated)
 

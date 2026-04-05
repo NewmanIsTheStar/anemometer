@@ -3324,6 +3324,62 @@ const char * cgi_anemometer_settings(int iIndex, int iNumParams, char *pcParam[]
     return "/weather.shtml";
 }
 
+/*!
+ * \brief cgi handler
+ *
+ * \param[in]  iIndex       index of cgi handler in cgi_handlers table
+ * \param[in]  iNumParams   number of parameters
+ * \param[in]  pcParam      parameter name
+ * \param[in]  pcValue      parameter value 
+ * 
+ * \return nothing
+ */
+const char * cgi_anemometer_gpio_handler(int iIndex, int iNumParams, char *pcParam[], char *pcValue[])
+{
+    int i = 0;
+    char *param = NULL;
+    char *value = NULL;
+    int len = 0;
+    int temp = 0;
+       
+
+    dump_parameters(iIndex, iNumParams, pcParam, pcValue);
+
+    i = 0;
+    while (i < iNumParams)
+    {
+        param = pcParam[i];
+        value = pcValue[i];
+
+        if (param && value)
+        {
+            printf("Parameter: %s has Value: %s\n", param, value);    
+
+            len = strlen(param);
+
+            if (strcasecmp("angpio", param) == 0)
+            {
+                if (!strcasestr(value, "none"))
+                { 
+                    sscanf(value, "%d", &temp);
+
+                    if (gpio_valid(temp))
+                    {
+                        config.anemometer_adc_gpio = temp;
+                    }
+                }                
+            }                                           
+        }
+        i++;
+    }
+
+    // write config changes to flash
+    config_changed();
+ 
+    // Send the next page back to the user
+    return "/a_gpio.shtml";    
+}
+
 // CGI requests and their respective handlers  --Add new entires at bottom--
 static const tCGI cgi_handlers[] = {
     {"/schedule.cgi",                   cgi_schedule_handler},
@@ -3374,7 +3430,7 @@ static const tCGI cgi_handlers[] = {
     {"/t_sensors.cgi",                  cgi_temperature_sensors},
     {"/t_advanced.cgi",                 cgi_advanced_settings},    
     {"/anemometer.cgi",                 cgi_anemometer_settings},     
-     
+    {"/a_gpio.cgi",                     cgi_anemometer_gpio_handler},      
 };
 
 /*!

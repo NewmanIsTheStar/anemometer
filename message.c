@@ -100,6 +100,7 @@ int receive_wind_speed_request(tsWIND_SPEED_RQST *psMsg, SOCKADDR_IN sDest);
 int receive_wind_speed_confirm(tsWIND_SPEED_CNFM *psMsg, SOCKADDR_IN sDest);
 
 // external variables
+extern uint32_t unix_time;
 extern NON_VOL_VARIABLES_T config;
 extern WEB_VARIABLES_T web;
 
@@ -111,6 +112,7 @@ static char message_buffer[128];
 static int message_receive_timeout = 5000000;                             // five seconds
 static DOUBLE_BUF_INT remote_pattern;
 static DOUBLE_BUF_INT remote_speed;
+static uint32_t last_confirm_unix_time = 0;
 
 /*!
  * \brief process messages sent to port 6969, format defined in message_defs.h
@@ -125,6 +127,9 @@ void message_task(__unused void *params)
     int received_bytes = 0;         
     
     printf("message_task started\n");
+
+    // set initial value for last confirm watchdog trigger
+    last_confirm_unix_time = unix_time;
 
     initialize_remote_led_strips();
     initialize_remote_anemometer();
@@ -188,11 +193,18 @@ void message_task(__unused void *params)
                 }     
             }
 
-            control_remote_led_strips();
+            //control_remote_led_strips();
             poll_remote_anemometer();
 
-            // tell watchdog task that we are still alive
-            watchdog_pulse((int *)params);    
+            if ((unix_time - last_confirm_unix_time) < (60*60))
+            {
+                // tell watchdog task that we are still alive
+                watchdog_pulse((int *)params);   
+            }
+            else
+            {
+                send_syslog_message("anemometer", "No confirm sent for one hour so allowing watchdog reset");
+            }
         }
     }
 }
@@ -694,7 +706,11 @@ int receive_wind_speed_request(tsWIND_SPEED_RQST *psMsg, SOCKADDR_IN sDest)
     if (htonl(psMsg->sHeader.version) == 1)
     {   
         // send confirmation message
-        send_wind_speed_confirm(iError, sDest, htonl(psMsg->sHeader.transaction), htonl(psMsg->sHeader.sequence));
+        if (send_wind_speed_confirm(iError, sDest, htonl(psMsg->sHeader.transaction), htonl(psMsg->sHeader.sequence)) > 0)
+        {
+            // remember the last time we sent a confirm message
+            last_confirm_unix_time = unix_time;
+        }
     }
 
     return EXIT_SUCCESS;

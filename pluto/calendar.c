@@ -26,7 +26,7 @@
 #include "FreeRTOSConfig.h"
 #include "task.h"
 
-#include "weather.h"
+// #include "weather.h"
 #include "calendar.h"
 #include "cgi.h"
 

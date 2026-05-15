@@ -31,18 +31,19 @@
 #include "stdarg.h"
 
 #include "watchdog.h"
-#include "weather.h"
+// #include "weather.h"
 #include "anemometer.h"
 #include "flash.h"
 #include "calendar.h"
 #include "utility.h"
 #include "config.h"
-#include "led_strip.h"
+// #include "led_strip.h"
 #include "message.h"
 // #include "altcp_tls_mbedtls_structs.h"
 // #include "powerwall.h"
 #include "pluto.h"
 // #include "tm1637.h"
+#include "web.h"
 
 #define WIND_SPEED_MOVING_AVERAGE_NUM_SAMPLES (3)
 

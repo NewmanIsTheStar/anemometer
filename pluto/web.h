@@ -10,14 +10,14 @@ typedef struct WEB_VARIABLES
 {
   uint8_t mac[6];
   int access_point_mode;
-  char last_completed_timestring[50];
-  char last_usurped_timestring[50];
-  int outside_temperature;
+  // char last_completed_timestring[50];
+  // char last_usurped_timestring[50];
+  // int outside_temperature;
   int wind_speed;
-  int daily_rain;
-  int weekly_rain;                  // this comes from weather station based on calendar weeks and is not useful for irrigation decisions
-  int trailing_seven_days_rain;     // this is accumulated from the daily totals as it is more relevant to irrigation decision
-  uint8_t soil_moisture[16];
+  // int daily_rain;
+  // int weekly_rain;                  // this comes from weather station based on calendar weeks and is not useful for irrigation decisions
+  // int trailing_seven_days_rain;     // this is accumulated from the daily totals as it is more relevant to irrigation decision
+  // uint8_t soil_moisture[16];
   char watchdog_timestring[50];
   uint32_t us_last_rx_packet;
   char status_message[50];
@@ -29,30 +29,30 @@ typedef struct WEB_VARIABLES
   int bind_failures;
   int connect_failures;  
   int syslog_transmit_failures;
-  int govee_transmit_failures;
-  int weather_station_transmit_failures;
+  // int govee_transmit_failures;
+  // int weather_station_transmit_failures;
   int pluto_transmit_failures;
   char software_server[100];
   char software_url[100];
   char software_file[100];
-  int led_current_pattern;
-  int led_current_transition_delay;
+  // int led_current_pattern;
+  // int led_current_transition_delay;
   char led_last_request_ip[32];
-  int irrigation_test_enable;
-  int thermostat_set_point;                // desired temperature
-  int thermostat_heating_set_point;        // target temperature when heating
-  int thermostat_cooling_set_point;        // target temperature when cooling 
+  // int irrigation_test_enable;
+  // int thermostat_set_point;                // desired temperature
+  // int thermostat_heating_set_point;        // target temperature when heating
+  // int thermostat_cooling_set_point;        // target temperature when cooling 
   //int thermostat_hysteresis;
-  int thermostat_day;              // used for rendering thermostat event web page -- making that page single user / session only
-  int thermostat_period_row;
-  int thermostat_day_events[7];
-  int thermostat_grid[8][8];
-  int thermostat_temperature;       // current temperature
-  int powerwall_grid_status;
-  int powerwall_battery_percentage;
-  int thermostat_temperature_moving_average;
-  int thermostat_temperature_gradient;
-  int thermostat_temperature_prediction;
+  // int thermostat_day;              // used for rendering thermostat event web page -- making that page single user / session only
+  // int thermostat_period_row;
+  // int thermostat_day_events[7];
+  // int thermostat_grid[8][8];
+  // int thermostat_temperature;       // current temperature
+  // int powerwall_grid_status;
+  // int powerwall_battery_percentage;
+  // int thermostat_temperature_moving_average;
+  // int thermostat_temperature_gradient;
+  // int thermostat_temperature_prediction;
   // THERMOSTAT_MODE_T thermostat_effective_mode;
   int anemometer_wind_speed;
   int anemometer_adc_min;

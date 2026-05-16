@@ -126,3 +126,7 @@ void flash_get_config_size(void)
     }
 }
 
+void *flash_get_config_location(void)
+{
+    return((void *)(XIP_BASE +  FLASH_TARGET_OFFSET));
+}

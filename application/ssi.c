@@ -37,22 +37,75 @@
 extern WEB_VARIABLES_T web;
 extern NON_VOL_VARIABLES_T config;
 
+#define SYSTEM_SSI_TAGS \
+    x(time) \
+    x(dogtme) \
+    x(status) \
+    x(tz) \
+    x(dss) \
+    x(dse) \
+    x(ts1) \
+    x(ts2) \
+    x(ts3) \
+    x(ts4) \
+    x(dlse) \
+    x(ssid) \
+    x(wpass) \
+    x(dhcp) \
+    x(ipad) \
+    x(nmsk) \
+    x(ltme) \
+    x(slog) \
+    x(ghsh) \
+    x(dstu) \
+    x(spdu) \
+    x(tmpu) \
+    x(uau) \
+    x(stck) \
+    x(ipaddr) \
+    x(netmsk) \
+    x(gatewy) \
+    x(msck) \
+    x(bfail) \
+    x(cfail) \
+    x(sfail) \
+    x(simpe) \
+    x(mweek) \
+    x(colour) \
+    x(swlhst) \
+    x(swlurl) \
+    x(swlfle) \
+    x(sloge) \
+    x(pertyp) \
+    x(wific) \
+    x(gway) \
+    x(pernme) \
+    x(gpiou) \
+    x(gpioif) \
+    x(gpioih) \
+    x(gpioil) \
+    x(gpiooh) \
+    x(gpiool) \
+    x(macadr) \
+    x(hostn) \
+    x(mquser) \
+    x(mqpass) \
+    x(mqaddr) 
+
+
 /*List of SSI tags used in html files
   Notes:-
     1. This list is used to create a matching enum and string constant for each SSI tag
     2. Only append to end of list.  Do not insert, delete or reorder the existing items!
     3. Related items are assumed to be in sequence in the code e.g. days of week
 */
-#define SSI_TAGS \
+#define APPLICATION_SSI_TAGS \
     x(usurped)   \
-    x(time)      \
     x(temp)      \
     x(wind)      \
     x(rain)      \
     x(lstpck)    \
-    x(dogtme)    \
     x(rainwk)    \
-    x(status)    \
     x(sun)       \
     x(mon)       \
     x(tue)       \
@@ -74,24 +127,10 @@ extern NON_VOL_VARIABLES_T config;
     x(dur5)      \
     x(dur6)      \
     x(dur7)      \
-    x(tz)        \
-    x(dss)       \
-    x(dse)       \
-    x(ts1)       \
-    x(ts2)       \
-    x(ts3)       \
-    x(ts4)       \
-    x(dlse)      \
     x(ecoip)     \
     x(wkrn)      \
     x(dyrn)      \
     x(wndt)      \
-    x(ssid)      \
-    x(wpass)     \
-    x(dhcp)      \
-    x(ipad)      \
-    x(nmsk)      \
-    x(ltme)      \
     x(rly)       \
     x(gpio)      \
     x(lpat)      \
@@ -99,7 +138,6 @@ extern NON_VOL_VARIABLES_T config;
     x(lpin)      \
     x(lrgbw)     \
     x(lnum)      \
-    x(slog)      \
     x(gvea)      \
     x(wthr)      \
     x(day1)      \
@@ -117,32 +155,12 @@ extern NON_VOL_VARIABLES_T config;
     x(lia)       \
     x(liu)       \
     x(lis)       \
-    x(ghsh)      \
     x(lstsvn)    \
-    x(dstu)      \
-    x(spdu)      \
-    x(tmpu)      \
-    x(uau)       \
-    x(stck)      \
-    x(ipaddr)    \
-    x(netmsk)    \
-    x(gatewy)    \
-    x(msck)      \
-    x(bfail)     \
-    x(cfail)     \
-    x(sfail)     \
     x(wfail)     \
     x(gfail)     \
-    x(simpe)     \
-    x(mweek)     \
-    x(colour)    \
     x(calpge)    \
     x(porpge)    \
-    x(swlhst)    \
-    x(swlurl)    \
-    x(swlfle)    \
     x(wse)       \
-    x(sloge)     \
     x(rsadr1)    \
     x(rsadr2)    \
     x(rsadr3)    \
@@ -150,9 +168,6 @@ extern NON_VOL_VARIABLES_T config;
     x(rsadr5)    \
     x(rsadr6)    \
     x(rse)       \
-    x(pertyp)    \
-    x(wific)     \
-    x(gway)      \
     x(soilm1)    \
     x(soilt1)    \
     x(z1d1d)     \
@@ -257,7 +272,6 @@ extern NON_VOL_VARIABLES_T config;
     x(z7zviz)    \
     x(z8zviz)    \
     x(z1dur)     \
-    x(pernme)    \
     x(irgnow)    \
     x(sp1viz)    \
     x(sp2viz)    \
@@ -499,12 +513,6 @@ extern NON_VOL_VARIABLES_T config;
     x(thgpio) \
     x(tcgpio) \
     x(tfgpio) \
-    x(gpiou) \
-    x(gpioif) \
-    x(gpioih) \
-    x(gpioil) \
-    x(gpiooh) \
-    x(gpiool) \
     x(tsadr1)    \
     x(tsadr2)    \
     x(tsadr3)    \
@@ -748,7 +756,8 @@ extern NON_VOL_VARIABLES_T config;
 enum ssi_index
 {
 #define x(name) SSI_ ## name,
-SSI_TAGS
+SYSTEM_SSI_TAGS
+APPLICATION_SSI_TAGS
 #undef x
 };
 
@@ -756,7 +765,8 @@ SSI_TAGS
 const char * ssi_tags[] =
 {
 #define x(name) #name,
-SSI_TAGS
+SYSTEM_SSI_TAGS
+APPLICATION_SSI_TAGS
 #undef x
 };
 
@@ -777,16 +787,16 @@ u16_t ssi_handler(int iIndex, char *pcInsert, int iInsertLen)
     char gpio_list[192];
 
     switch(iIndex) {
-        case SSI_usurped:  // usurped
-        {
-            printed = snprintf(pcInsert, iInsertLen, "%s", web.last_usurped_timestring);    
-        }
-        break;
-        case SSI_cmplte:  // cmplte
-        {
-            printed = snprintf(pcInsert, iInsertLen, "%s", web.last_completed_timestring);    
-        }
-        break;        
+        // case SSI_usurped:  // usurped
+        // {
+        //     printed = snprintf(pcInsert, iInsertLen, "%s", web.last_usurped_timestring);    
+        // }
+        // break;
+        // case SSI_cmplte:  // cmplte
+        // {
+        //     printed = snprintf(pcInsert, iInsertLen, "%s", web.last_completed_timestring);    
+        // }
+        // break;        
         case SSI_time: // time
         {
             if(!get_timestamp(timestamp, sizeof(timestamp), false, false)) {
@@ -797,19 +807,19 @@ u16_t ssi_handler(int iIndex, char *pcInsert, int iInsertLen)
             }
         }
         break;        
-        case SSI_temp: // temp
-        {
-            if (!config.use_archaic_units)
-            {
-                printed = snprintf(pcInsert, iInsertLen, "%c%d.%d", web.outside_temperature<0?'-':' ', abs(web.outside_temperature/10), abs(web.outside_temperature%10)); 
-            }
-            else
-            {
-                temp = (web.outside_temperature*9)/5 + 320;
-                printed = snprintf(pcInsert, iInsertLen, "%c%ld.%ld", temp<0?'-':' ', abs(temp)/10, abs(temp%10));
-            }              
-        }
-        break;
+        // case SSI_temp: // temp
+        // {
+        //     if (!config.use_archaic_units)
+        //     {
+        //         printed = snprintf(pcInsert, iInsertLen, "%c%d.%d", web.outside_temperature<0?'-':' ', abs(web.outside_temperature/10), abs(web.outside_temperature%10)); 
+        //     }
+        //     else
+        //     {
+        //         temp = (web.outside_temperature*9)/5 + 320;
+        //         printed = snprintf(pcInsert, iInsertLen, "%c%ld.%ld", temp<0?'-':' ', abs(temp)/10, abs(temp%10));
+        //     }              
+        // }
+        // break;
         case SSI_wind: // wind
         {
             if ((config.anemometer_remote_enable) || (config.personality == ANEMOMETER))
@@ -832,19 +842,19 @@ u16_t ssi_handler(int iIndex, char *pcInsert, int iInsertLen)
             }              
         } 
         break;  
-        case SSI_rain: // rain
-        {
-            if (!config.use_archaic_units)
-            {
-                printed = snprintf(pcInsert, iInsertLen, "%d.%d", web.daily_rain/10, web.daily_rain%10); 
-            }
-            else
-            {
-                temp = (10*web.daily_rain + 127)/254;
-                printed = snprintf(pcInsert, iInsertLen, "%ld.%ld", temp/10, temp%10);
-            }            
-        }  
-        break;
+        // case SSI_rain: // rain
+        // {
+        //     if (!config.use_archaic_units)
+        //     {
+        //         printed = snprintf(pcInsert, iInsertLen, "%d.%d", web.daily_rain/10, web.daily_rain%10); 
+        //     }
+        //     else
+        //     {
+        //         temp = (10*web.daily_rain + 127)/254;
+        //         printed = snprintf(pcInsert, iInsertLen, "%ld.%ld", temp/10, temp%10);
+        //     }            
+        // }  
+        // break;
         case SSI_lstpck: // lstpck
         {
             if (web.us_last_rx_packet)
@@ -863,104 +873,104 @@ u16_t ssi_handler(int iIndex, char *pcInsert, int iInsertLen)
             printed = snprintf(pcInsert, iInsertLen, "%s", web.watchdog_timestring); 
         }  
         break;   
-        case SSI_rainwk: // rainwk
-        {          
-            if (!config.use_archaic_units)
-            {
-                printed = snprintf(pcInsert, iInsertLen, "%d.%d", web.weekly_rain/10, web.weekly_rain%10); 
-            }
-            else
-            {
-                temp = (10*web.weekly_rain + 127)/254;
-                printed = snprintf(pcInsert, iInsertLen, "%ld.%ld", temp/10, temp%10);
-            }             
-        }  
-        break;   
+        // case SSI_rainwk: // rainwk
+        // {          
+        //     if (!config.use_archaic_units)
+        //     {
+        //         printed = snprintf(pcInsert, iInsertLen, "%d.%d", web.weekly_rain/10, web.weekly_rain%10); 
+        //     }
+        //     else
+        //     {
+        //         temp = (10*web.weekly_rain + 127)/254;
+        //         printed = snprintf(pcInsert, iInsertLen, "%ld.%ld", temp/10, temp%10);
+        //     }             
+        // }  
+        // break;   
         case SSI_status: // status
         {
             printed = snprintf(pcInsert, iInsertLen, "%s", web.status_message); 
         }  
         break;
-        case SSI_sun:    // sun
-        case SSI_mon:    // mon
-        case SSI_tue:    // tue
-        case SSI_wed:    // wed
-        case SSI_thu:    // thu
-        case SSI_fri:    // fri
-        case SSI_sat:    // sat
-        {
-            printed = snprintf(pcInsert, iInsertLen, "%s", config.day_schedule_enable[iIndex-SSI_sun]?"ON":"OFF"); 
-        }  
-        break;
-        case SSI_strt1:
-        case SSI_strt2:
-        case SSI_strt3:
-        case SSI_strt4:
-        case SSI_strt5:
-        case SSI_strt6:
-        case SSI_strt7:
-        {
-            if (config.day_schedule_enable[iIndex-SSI_strt1])
-            {
-                printed = snprintf(pcInsert, iInsertLen, "%02d : %02d", config.day_start[iIndex-SSI_strt1]/60, config.day_start[iIndex-SSI_strt1]%60);
-            }
-            else
-            {
-                if (true /*config.personality == SPRINKLER_USURPER*/)
-                {
-                    printed = snprintf(pcInsert, iInsertLen, "-- : --"); 
-                }
-                else
-                {
-                    printed = snprintf(pcInsert, iInsertLen, " "); 
-                }                
-            }
-        }
-        break;
-        case SSI_ctrt1:
-        case SSI_ctrt2:
-        case SSI_ctrt3:
-        case SSI_ctrt4:
-        case SSI_ctrt5:
-        case SSI_ctrt6:
-        case SSI_ctrt7:
-        {
-            if (config.day_schedule_enable[iIndex-SSI_ctrt1])
-            {
-                printed = snprintf(pcInsert, iInsertLen, "%02d : %02d", config.day_start[iIndex-SSI_ctrt1]/60, config.day_start[iIndex-SSI_ctrt1]%60);
-            }
-            else
-            {
+        // case SSI_sun:    // sun
+        // case SSI_mon:    // mon
+        // case SSI_tue:    // tue
+        // case SSI_wed:    // wed
+        // case SSI_thu:    // thu
+        // case SSI_fri:    // fri
+        // case SSI_sat:    // sat
+        // {
+        //     printed = snprintf(pcInsert, iInsertLen, "%s", config.day_schedule_enable[iIndex-SSI_sun]?"ON":"OFF"); 
+        // }  
+        // break;
+        // case SSI_strt1:
+        // case SSI_strt2:
+        // case SSI_strt3:
+        // case SSI_strt4:
+        // case SSI_strt5:
+        // case SSI_strt6:
+        // case SSI_strt7:
+        // {
+        //     if (config.day_schedule_enable[iIndex-SSI_strt1])
+        //     {
+        //         printed = snprintf(pcInsert, iInsertLen, "%02d : %02d", config.day_start[iIndex-SSI_strt1]/60, config.day_start[iIndex-SSI_strt1]%60);
+        //     }
+        //     else
+        //     {
+        //         if (true /*config.personality == SPRINKLER_USURPER*/)
+        //         {
+        //             printed = snprintf(pcInsert, iInsertLen, "-- : --"); 
+        //         }
+        //         else
+        //         {
+        //             printed = snprintf(pcInsert, iInsertLen, " "); 
+        //         }                
+        //     }
+        // }
+        // break;
+        // case SSI_ctrt1:
+        // case SSI_ctrt2:
+        // case SSI_ctrt3:
+        // case SSI_ctrt4:
+        // case SSI_ctrt5:
+        // case SSI_ctrt6:
+        // case SSI_ctrt7:
+        // {
+        //     if (config.day_schedule_enable[iIndex-SSI_ctrt1])
+        //     {
+        //         printed = snprintf(pcInsert, iInsertLen, "%02d : %02d", config.day_start[iIndex-SSI_ctrt1]/60, config.day_start[iIndex-SSI_ctrt1]%60);
+        //     }
+        //     else
+        //     {
 
-                printed = snprintf(pcInsert, iInsertLen, "&nbsp;");             
-            }
-        }
-        break;        
-        case SSI_dur1:
-        case SSI_dur2:
-        case SSI_dur3:
-        case SSI_dur4:
-        case SSI_dur5:
-        case SSI_dur6:
-        case SSI_dur7:
-        {
-            if (config.day_schedule_enable[iIndex-SSI_dur1])
-            {
-                printed = snprintf(pcInsert, iInsertLen, "%d", config.day_duration[iIndex-SSI_dur1]);    
-            }
-            else
-            {                 
-                if (true /*config.personality == SPRINKLER_USURPER*/)
-                {
-                    printed = snprintf(pcInsert, iInsertLen, "--"); 
-                }
-                else
-                {
-                    printed = snprintf(pcInsert, iInsertLen, " "); 
-                } 
-            }
-        }
-        break;
+        //         printed = snprintf(pcInsert, iInsertLen, "&nbsp;");             
+        //     }
+        // }
+        // break;        
+        // case SSI_dur1:
+        // case SSI_dur2:
+        // case SSI_dur3:
+        // case SSI_dur4:
+        // case SSI_dur5:
+        // case SSI_dur6:
+        // case SSI_dur7:
+        // {
+        //     if (config.day_schedule_enable[iIndex-SSI_dur1])
+        //     {
+        //         printed = snprintf(pcInsert, iInsertLen, "%d", config.day_duration[iIndex-SSI_dur1]);    
+        //     }
+        //     else
+        //     {                 
+        //         if (true /*config.personality == SPRINKLER_USURPER*/)
+        //         {
+        //             printed = snprintf(pcInsert, iInsertLen, "--"); 
+        //         }
+        //         else
+        //         {
+        //             printed = snprintf(pcInsert, iInsertLen, " "); 
+        //         } 
+        //     }
+        // }
+        // break;
         case SSI_tz:
         {
             if (config.timezone_offset > 0)
@@ -1014,26 +1024,26 @@ u16_t ssi_handler(int iIndex, char *pcInsert, int iInsertLen)
             printed = snprintf(pcInsert, iInsertLen, "%s", config.daylightsaving_enable?"checked":""); 
         }  
         break;    
-        case SSI_ecoip: //ecoip
-        {
-            printed = snprintf(pcInsert, iInsertLen, "%s", config.weather_station_ip);
-        }               
-        break;
-        case SSI_wkrn: //wkrn
-        {
-            printed = snprintf(pcInsert, iInsertLen, "%d.%d", config.rain_week_threshold/10, config.rain_week_threshold%10);   
-        }               
-        break;        
-        case SSI_dyrn: //dyrn
-        {
-            printed = snprintf(pcInsert, iInsertLen, "%d.%d", config.rain_day_threshold/10, config.rain_day_threshold%10);
-        }               
-        break; 
-        case SSI_wndt: //wndt
-        {
-            printed = snprintf(pcInsert, iInsertLen, "%d.%d", config.wind_threshold/10, config.wind_threshold%10);
-        }               
-        break;
+        // case SSI_ecoip: //ecoip
+        // {
+        //     printed = snprintf(pcInsert, iInsertLen, "%s", config.weather_station_ip);
+        // }               
+        // break;
+        // case SSI_wkrn: //wkrn
+        // {
+        //     printed = snprintf(pcInsert, iInsertLen, "%d.%d", config.rain_week_threshold/10, config.rain_week_threshold%10);   
+        // }               
+        // break;        
+        // case SSI_dyrn: //dyrn
+        // {
+        //     printed = snprintf(pcInsert, iInsertLen, "%d.%d", config.rain_day_threshold/10, config.rain_day_threshold%10);
+        // }               
+        // break; 
+        // case SSI_wndt: //wndt
+        // {
+        //     printed = snprintf(pcInsert, iInsertLen, "%d.%d", config.wind_threshold/10, config.wind_threshold%10);
+        // }               
+        // break;
         case SSI_ssid: //ssid
         {
             printed = snprintf(pcInsert, iInsertLen, "%s", config.wifi_ssid);
@@ -1089,92 +1099,92 @@ u16_t ssi_handler(int iIndex, char *pcInsert, int iInsertLen)
             printed = get_local_time_string(pcInsert, iInsertLen);
         }               
         break;
-        case SSI_rly: //rly
-        {
-            printed = snprintf(pcInsert, iInsertLen, "%s", config.relay_normally_open?"checked":"");
-        }               
-        break; 
-        case SSI_gpio: //gpio
-        {
-            printed = snprintf(pcInsert, iInsertLen, "%d", config.gpio_number);
-        }               
-        break;   
+        // case SSI_rly: //rly
+        // {
+        //     printed = snprintf(pcInsert, iInsertLen, "%s", config.relay_normally_open?"checked":"");
+        // }               
+        // break; 
+        // case SSI_gpio: //gpio
+        // {
+        //     printed = snprintf(pcInsert, iInsertLen, "%d", config.gpio_number);
+        // }               
+        // break;   
         // case SSI_lpat: //lpat
         // {
         //     printed = snprintf(pcInsert, iInsertLen, "%s", get_pattern_name(config.led_pattern)); 
         // }               
         // break; 
-        case SSI_lspd: //lspd
-        {
-            printed = snprintf(pcInsert, iInsertLen, "%d", config.led_speed);
-        }               
-        break;     
-        case SSI_lpin: //lpin
-        {
-            printed = snprintf(pcInsert, iInsertLen, "%d", config.led_pin);
-        }               
-        break;                                      
-        case SSI_lrgbw: //lrgbw
-        {
-            printed = snprintf(pcInsert, iInsertLen, "%d", config.led_rgbw);
-        }               
-        break;  
-        case SSI_lnum: //lnum
-        {
-            printed = snprintf(pcInsert, iInsertLen, "%d", config.led_number);
-        }               
-        break;  
+        // case SSI_lspd: //lspd
+        // {
+        //     printed = snprintf(pcInsert, iInsertLen, "%d", config.led_speed);
+        // }               
+        // break;     
+        // case SSI_lpin: //lpin
+        // {
+        //     printed = snprintf(pcInsert, iInsertLen, "%d", config.led_pin);
+        // }               
+        // break;                                      
+        // case SSI_lrgbw: //lrgbw
+        // {
+        //     printed = snprintf(pcInsert, iInsertLen, "%d", config.led_rgbw);
+        // }               
+        // break;  
+        // case SSI_lnum: //lnum
+        // {
+        //     printed = snprintf(pcInsert, iInsertLen, "%d", config.led_number);
+        // }               
+        // break;  
         case SSI_slog: //slog
         {
             printed = snprintf(pcInsert, iInsertLen, "%s", config.syslog_server_ip);
         }
         break;     
-        case SSI_gvea: //gvea
-        {
-            printed = snprintf(pcInsert, iInsertLen, "%s", config.govee_light_ip);
-        } 
-        break;   
-        case SSI_wthr: //wthr
-        {
-            printed = snprintf(pcInsert, iInsertLen, "%s", config.weather_station_ip);
-        } 
-        break; 
-        case SSI_day1:    // day1 (sun)
-        case SSI_day2:    // day2 (mon)
-        case SSI_day3:    // day3 (tue)
-        case SSI_day4:    // day4 (wed)
-        case SSI_day5:    // day5 (thu)
-        case SSI_day6:    // day6 (fri)
-        case SSI_day7:    // day7 (sat)
-        {
-            printed = snprintf(pcInsert, iInsertLen, "%s", config.day_schedule_enable[iIndex-SSI_day1]?"checked":""); 
-        }  
-        break;
-        case SSI_gvee: //gvee
-        {
-            printed = snprintf(pcInsert, iInsertLen, "%s", config.use_govee_to_indicate_irrigation_status?"checked":""); 
-        }
-        break;
-        case SSI_gvei: //gvei
-        {
-            printed = snprintf(pcInsert, iInsertLen, "%d.%d.%d", config.govee_irrigation_active_red, config.govee_irrigation_active_green, config.govee_irrigation_active_blue);
-        }
-        break;
-        case SSI_gveu: //gveu
-        {
-            printed = snprintf(pcInsert, iInsertLen, "%d.%d.%d", config.govee_irrigation_usurped_red, config.govee_irrigation_usurped_green, config.govee_irrigation_usurped_blue);
-        }
-        break;
-        case SSI_gves: //gves
-        {
-            printed = snprintf(pcInsert, iInsertLen, "%d", config.govee_sustain_duration);
-        }
-        break;                        
-        case SSI_lie: //lie
-        {
-            printed = snprintf(pcInsert, iInsertLen, "%s", config.use_led_strip_to_indicate_irrigation_status?"checked":""); 
-        }
-        break;
+        // case SSI_gvea: //gvea
+        // {
+        //     printed = snprintf(pcInsert, iInsertLen, "%s", config.govee_light_ip);
+        // } 
+        // break;   
+        // case SSI_wthr: //wthr
+        // {
+        //     printed = snprintf(pcInsert, iInsertLen, "%s", config.weather_station_ip);
+        // } 
+        // break; 
+        // case SSI_day1:    // day1 (sun)
+        // case SSI_day2:    // day2 (mon)
+        // case SSI_day3:    // day3 (tue)
+        // case SSI_day4:    // day4 (wed)
+        // case SSI_day5:    // day5 (thu)
+        // case SSI_day6:    // day6 (fri)
+        // case SSI_day7:    // day7 (sat)
+        // {
+        //     printed = snprintf(pcInsert, iInsertLen, "%s", config.day_schedule_enable[iIndex-SSI_day1]?"checked":""); 
+        // }  
+        // break;
+        // case SSI_gvee: //gvee
+        // {
+        //     printed = snprintf(pcInsert, iInsertLen, "%s", config.use_govee_to_indicate_irrigation_status?"checked":""); 
+        // }
+        // break;
+        // case SSI_gvei: //gvei
+        // {
+        //     printed = snprintf(pcInsert, iInsertLen, "%d.%d.%d", config.govee_irrigation_active_red, config.govee_irrigation_active_green, config.govee_irrigation_active_blue);
+        // }
+        // break;
+        // case SSI_gveu: //gveu
+        // {
+        //     printed = snprintf(pcInsert, iInsertLen, "%d.%d.%d", config.govee_irrigation_usurped_red, config.govee_irrigation_usurped_green, config.govee_irrigation_usurped_blue);
+        // }
+        // break;
+        // case SSI_gves: //gves
+        // {
+        //     printed = snprintf(pcInsert, iInsertLen, "%d", config.govee_sustain_duration);
+        // }
+        // break;                        
+        // case SSI_lie: //lie
+        // {
+        //     printed = snprintf(pcInsert, iInsertLen, "%s", config.use_led_strip_to_indicate_irrigation_status?"checked":""); 
+        // }
+        // break;
         // case SSI_lia: //lia
         // {
         //     printed = snprintf(pcInsert, iInsertLen, "%s", get_pattern_name(config.led_pattern_when_irrigation_active));           
@@ -1185,11 +1195,11 @@ u16_t ssi_handler(int iIndex, char *pcInsert, int iInsertLen)
         //     printed = snprintf(pcInsert, iInsertLen, "%s", get_pattern_name(config.led_pattern_when_irrigation_terminated));            
         // }
         // break; 
-        case SSI_lis: //lis
-        {
-            printed = snprintf(pcInsert, iInsertLen, "%d", config.led_sustain_duration);
-        }
-        break; 
+        // case SSI_lis: //lis
+        // {
+        //     printed = snprintf(pcInsert, iInsertLen, "%d", config.led_sustain_duration);
+        // }
+        // break; 
         case SSI_ghsh: //ghsh
         {
             #ifdef USE_GIT_HASH_AS_VERSION
@@ -1199,20 +1209,20 @@ u16_t ssi_handler(int iIndex, char *pcInsert, int iInsertLen)
             #endif
         }                        
         break;
-        case SSI_lstsvn: //lstsvn
-        {
-            if (!config.use_archaic_units)
-            {
-                printed = snprintf(pcInsert, iInsertLen, "%d.%d", web.trailing_seven_days_rain/10, web.trailing_seven_days_rain%10); 
-            }
-            else
-            {
-                temp = (10*web.trailing_seven_days_rain + 127)/254;
-                printed = snprintf(pcInsert, iInsertLen, "%ld.%ld", temp/10, temp%10);
-            }                
+        // case SSI_lstsvn: //lstsvn
+        // {
+        //     if (!config.use_archaic_units)
+        //     {
+        //         printed = snprintf(pcInsert, iInsertLen, "%d.%d", web.trailing_seven_days_rain/10, web.trailing_seven_days_rain%10); 
+        //     }
+        //     else
+        //     {
+        //         temp = (10*web.trailing_seven_days_rain + 127)/254;
+        //         printed = snprintf(pcInsert, iInsertLen, "%ld.%ld", temp/10, temp%10);
+        //     }                
             
-        }                        
-        break;    
+        // }                        
+        // break;    
         case SSI_dstu: //dstu
         {
             printed = snprintf(pcInsert, iInsertLen, "%s", config.use_archaic_units?"inches":"mm"); 
@@ -1285,16 +1295,16 @@ u16_t ssi_handler(int iIndex, char *pcInsert, int iInsertLen)
             printed = snprintf(pcInsert, iInsertLen, "%d", web.syslog_transmit_failures);
         }               
         break;  
-        case SSI_wfail: //wfail
-        {
-            printed = snprintf(pcInsert, iInsertLen, "%d", web.weather_station_transmit_failures);
-        }               
-        break;  
-        case SSI_gfail: //gfail
-        {
-            printed = snprintf(pcInsert, iInsertLen, "%d", web.govee_transmit_failures);
-        }               
-        break;   
+        // case SSI_wfail: //wfail
+        // {
+        //     printed = snprintf(pcInsert, iInsertLen, "%d", web.weather_station_transmit_failures);
+        // }               
+        // break;  
+        // case SSI_gfail: //gfail
+        // {
+        //     printed = snprintf(pcInsert, iInsertLen, "%d", web.govee_transmit_failures);
+        // }               
+        // break;   
         case SSI_simpe: //simpe
         {
             printed = snprintf(pcInsert, iInsertLen, "%s", config.use_simplified_english?"checked":"");
@@ -1447,31 +1457,31 @@ u16_t ssi_handler(int iIndex, char *pcInsert, int iInsertLen)
             printed = snprintf(pcInsert, iInsertLen, "%s", web.software_file);
         }               
         break;    
-        case SSI_wse: //wse
-        {
-            printed = snprintf(pcInsert, iInsertLen, "%s", config.weather_station_enable?"checked":"");
-        }   
-        break;   
+        // case SSI_wse: //wse
+        // {
+        //     printed = snprintf(pcInsert, iInsertLen, "%s", config.weather_station_enable?"checked":"");
+        // }   
+        // break;   
         case SSI_sloge: //sloge
         {
             printed = snprintf(pcInsert, iInsertLen, "%s", config.syslog_enable?"checked":"");
         } 
         break;                                    
-        case SSI_rsadr1: //rsdar1
-        case SSI_rsadr2: //rsdar2
-        case SSI_rsadr3: //rsdar3
-        case SSI_rsadr4: //rsdar4
-        case SSI_rsadr5: //rsdar5
-        case SSI_rsadr6: //rsdar6               
-        {
-            printed = snprintf(pcInsert, iInsertLen, "%s", config.led_strip_remote_ip[iIndex-SSI_rsadr1]); 
-        }                     
-        break; 
-        case SSI_rse: //rse
-        {
-            printed = snprintf(pcInsert, iInsertLen, "%s", config.led_strip_remote_enable?"checked":"");
-        } 
-        break;
+        // case SSI_rsadr1: //rsdar1
+        // case SSI_rsadr2: //rsdar2
+        // case SSI_rsadr3: //rsdar3
+        // case SSI_rsadr4: //rsdar4
+        // case SSI_rsadr5: //rsdar5
+        // case SSI_rsadr6: //rsdar6               
+        // {
+        //     printed = snprintf(pcInsert, iInsertLen, "%s", config.led_strip_remote_ip[iIndex-SSI_rsadr1]); 
+        // }                     
+        // break; 
+        // case SSI_rse: //rse
+        // {
+        //     printed = snprintf(pcInsert, iInsertLen, "%s", config.led_strip_remote_enable?"checked":"");
+        // } 
+        // break;
         case SSI_pertyp: //pertyp
         {
             printed = snprintf(pcInsert, iInsertLen, "%d", config.personality);
@@ -1487,209 +1497,209 @@ u16_t ssi_handler(int iIndex, char *pcInsert, int iInsertLen)
             printed = snprintf(pcInsert, iInsertLen, "%s", web.gateway_string);
         }                       
         break;
-        case SSI_soilm1: //soilm1
-        {
-            printed = snprintf(pcInsert, iInsertLen, "%d", web.soil_moisture[0]);
-        }                       
-        break;    
-        case SSI_soilt1: //soilt1
-        {
-            printed = snprintf(pcInsert, iInsertLen, "%d", config.soil_moisture_threshold[0]);
-        }                       
-        break;   
-        case SSI_z1d1d:
-        case SSI_z1d2d:
-        case SSI_z1d3d:
-        case SSI_z1d4d:
-        case SSI_z1d5d:
-        case SSI_z1d6d:
-        case SSI_z1d7d:
-        case SSI_z2d1d:
-        case SSI_z2d2d:
-        case SSI_z2d3d:
-        case SSI_z2d4d:
-        case SSI_z2d5d:
-        case SSI_z2d6d:
-        case SSI_z2d7d:
-        case SSI_z3d1d:
-        case SSI_z3d2d:
-        case SSI_z3d3d:
-        case SSI_z3d4d:
-        case SSI_z3d5d:
-        case SSI_z3d6d:
-        case SSI_z3d7d:
-        case SSI_z4d1d:
-        case SSI_z4d2d:
-        case SSI_z4d3d:
-        case SSI_z4d4d:
-        case SSI_z4d5d:
-        case SSI_z4d6d:
-        case SSI_z4d7d:
-        case SSI_z5d1d:
-        case SSI_z5d2d:
-        case SSI_z5d3d:
-        case SSI_z5d4d:
-        case SSI_z5d5d:
-        case SSI_z5d6d:
-        case SSI_z5d7d:
-        case SSI_z6d1d:
-        case SSI_z6d2d:
-        case SSI_z6d3d:
-        case SSI_z6d4d:
-        case SSI_z6d5d:
-        case SSI_z6d6d:
-        case SSI_z6d7d:
-        case SSI_z7d1d:
-        case SSI_z7d2d:
-        case SSI_z7d3d:
-        case SSI_z7d4d:
-        case SSI_z7d5d:
-        case SSI_z7d6d:
-        case SSI_z7d7d:
-        case SSI_z8d1d:
-        case SSI_z8d2d:
-        case SSI_z8d3d:
-        case SSI_z8d4d:
-        case SSI_z8d5d:
-        case SSI_z8d6d:
-        case SSI_z8d7d:
-        {  
-            if (config.day_schedule_enable[(iIndex-SSI_z1d1d)%7])
-            {
-                printed = snprintf(pcInsert, iInsertLen, "%d", config.zone_duration[(iIndex-SSI_z1d1d)/7][(iIndex-SSI_z1d1d)%7]);
-            }
-            else
-            {
-                if (true /*config.personality == SPRINKLER_USURPER*/)
-                {
-                    printed = snprintf(pcInsert, iInsertLen, "--");  
-                }
-                else
-                {
-                    printed = snprintf(pcInsert, iInsertLen, " ");  
-                }
+        // case SSI_soilm1: //soilm1
+        // {
+        //     printed = snprintf(pcInsert, iInsertLen, "%d", web.soil_moisture[0]);
+        // }                       
+        // break;    
+        // case SSI_soilt1: //soilt1
+        // {
+        //     printed = snprintf(pcInsert, iInsertLen, "%d", config.soil_moisture_threshold[0]);
+        // }                       
+        // break;   
+        // case SSI_z1d1d:
+        // case SSI_z1d2d:
+        // case SSI_z1d3d:
+        // case SSI_z1d4d:
+        // case SSI_z1d5d:
+        // case SSI_z1d6d:
+        // case SSI_z1d7d:
+        // case SSI_z2d1d:
+        // case SSI_z2d2d:
+        // case SSI_z2d3d:
+        // case SSI_z2d4d:
+        // case SSI_z2d5d:
+        // case SSI_z2d6d:
+        // case SSI_z2d7d:
+        // case SSI_z3d1d:
+        // case SSI_z3d2d:
+        // case SSI_z3d3d:
+        // case SSI_z3d4d:
+        // case SSI_z3d5d:
+        // case SSI_z3d6d:
+        // case SSI_z3d7d:
+        // case SSI_z4d1d:
+        // case SSI_z4d2d:
+        // case SSI_z4d3d:
+        // case SSI_z4d4d:
+        // case SSI_z4d5d:
+        // case SSI_z4d6d:
+        // case SSI_z4d7d:
+        // case SSI_z5d1d:
+        // case SSI_z5d2d:
+        // case SSI_z5d3d:
+        // case SSI_z5d4d:
+        // case SSI_z5d5d:
+        // case SSI_z5d6d:
+        // case SSI_z5d7d:
+        // case SSI_z6d1d:
+        // case SSI_z6d2d:
+        // case SSI_z6d3d:
+        // case SSI_z6d4d:
+        // case SSI_z6d5d:
+        // case SSI_z6d6d:
+        // case SSI_z6d7d:
+        // case SSI_z7d1d:
+        // case SSI_z7d2d:
+        // case SSI_z7d3d:
+        // case SSI_z7d4d:
+        // case SSI_z7d5d:
+        // case SSI_z7d6d:
+        // case SSI_z7d7d:
+        // case SSI_z8d1d:
+        // case SSI_z8d2d:
+        // case SSI_z8d3d:
+        // case SSI_z8d4d:
+        // case SSI_z8d5d:
+        // case SSI_z8d6d:
+        // case SSI_z8d7d:
+        // {  
+        //     if (config.day_schedule_enable[(iIndex-SSI_z1d1d)%7])
+        //     {
+        //         printed = snprintf(pcInsert, iInsertLen, "%d", config.zone_duration[(iIndex-SSI_z1d1d)/7][(iIndex-SSI_z1d1d)%7]);
+        //     }
+        //     else
+        //     {
+        //         if (true /*config.personality == SPRINKLER_USURPER*/)
+        //         {
+        //             printed = snprintf(pcInsert, iInsertLen, "--");  
+        //         }
+        //         else
+        //         {
+        //             printed = snprintf(pcInsert, iInsertLen, " ");  
+        //         }
                 
-            }                                 
-        }
-        break;
-        case SSI_c1d1d:
-        case SSI_c1d2d:
-        case SSI_c1d3d:
-        case SSI_c1d4d:
-        case SSI_c1d5d:
-        case SSI_c1d6d:
-        case SSI_c1d7d:
-        case SSI_c2d1d:
-        case SSI_c2d2d:
-        case SSI_c2d3d:
-        case SSI_c2d4d:
-        case SSI_c2d5d:
-        case SSI_c2d6d:
-        case SSI_c2d7d:
-        case SSI_c3d1d:
-        case SSI_c3d2d:
-        case SSI_c3d3d:
-        case SSI_c3d4d:
-        case SSI_c3d5d:
-        case SSI_c3d6d:
-        case SSI_c3d7d:
-        case SSI_c4d1d:
-        case SSI_c4d2d:
-        case SSI_c4d3d:
-        case SSI_c4d4d:
-        case SSI_c4d5d:
-        case SSI_c4d6d:
-        case SSI_c4d7d:
-        case SSI_c5d1d:
-        case SSI_c5d2d:
-        case SSI_c5d3d:
-        case SSI_c5d4d:
-        case SSI_c5d5d:
-        case SSI_c5d6d:
-        case SSI_c5d7d:
-        case SSI_c6d1d:
-        case SSI_c6d2d:
-        case SSI_c6d3d:
-        case SSI_c6d4d:
-        case SSI_c6d5d:
-        case SSI_c6d6d:
-        case SSI_c6d7d:
-        case SSI_c7d1d:
-        case SSI_c7d2d:
-        case SSI_c7d3d:
-        case SSI_c7d4d:
-        case SSI_c7d5d:
-        case SSI_c7d6d:
-        case SSI_c7d7d:
-        case SSI_c8d1d:
-        case SSI_c8d2d:
-        case SSI_c8d3d:
-        case SSI_c8d4d:
-        case SSI_c8d5d:
-        case SSI_c8d6d:
-        case SSI_c8d7d:
-        {  
-            if (config.day_schedule_enable[(iIndex-SSI_c1d1d)%7])
-            {
-                printed = snprintf(pcInsert, iInsertLen, "%d min", config.zone_duration[(iIndex-SSI_c1d1d)/7][(iIndex-SSI_c1d1d)%7]);
-            }
-            else
-            {
-                printed = snprintf(pcInsert, iInsertLen, "&nbsp;");    
-            }                                 
-        }
-        break;        
-        case SSI_clpat: //clpat
-        {
-            printed = snprintf(pcInsert, iInsertLen, "%d", web.led_current_pattern);
-        } 
-        break;
-        case SSI_cltran: //cltran
-        {
-            printed = snprintf(pcInsert, iInsertLen, "%d", web.led_current_transition_delay);
-        } 
-        break;  
+        //     }                                 
+        // }
+        // break;
+        // case SSI_c1d1d:
+        // case SSI_c1d2d:
+        // case SSI_c1d3d:
+        // case SSI_c1d4d:
+        // case SSI_c1d5d:
+        // case SSI_c1d6d:
+        // case SSI_c1d7d:
+        // case SSI_c2d1d:
+        // case SSI_c2d2d:
+        // case SSI_c2d3d:
+        // case SSI_c2d4d:
+        // case SSI_c2d5d:
+        // case SSI_c2d6d:
+        // case SSI_c2d7d:
+        // case SSI_c3d1d:
+        // case SSI_c3d2d:
+        // case SSI_c3d3d:
+        // case SSI_c3d4d:
+        // case SSI_c3d5d:
+        // case SSI_c3d6d:
+        // case SSI_c3d7d:
+        // case SSI_c4d1d:
+        // case SSI_c4d2d:
+        // case SSI_c4d3d:
+        // case SSI_c4d4d:
+        // case SSI_c4d5d:
+        // case SSI_c4d6d:
+        // case SSI_c4d7d:
+        // case SSI_c5d1d:
+        // case SSI_c5d2d:
+        // case SSI_c5d3d:
+        // case SSI_c5d4d:
+        // case SSI_c5d5d:
+        // case SSI_c5d6d:
+        // case SSI_c5d7d:
+        // case SSI_c6d1d:
+        // case SSI_c6d2d:
+        // case SSI_c6d3d:
+        // case SSI_c6d4d:
+        // case SSI_c6d5d:
+        // case SSI_c6d6d:
+        // case SSI_c6d7d:
+        // case SSI_c7d1d:
+        // case SSI_c7d2d:
+        // case SSI_c7d3d:
+        // case SSI_c7d4d:
+        // case SSI_c7d5d:
+        // case SSI_c7d6d:
+        // case SSI_c7d7d:
+        // case SSI_c8d1d:
+        // case SSI_c8d2d:
+        // case SSI_c8d3d:
+        // case SSI_c8d4d:
+        // case SSI_c8d5d:
+        // case SSI_c8d6d:
+        // case SSI_c8d7d:
+        // {  
+        //     if (config.day_schedule_enable[(iIndex-SSI_c1d1d)%7])
+        //     {
+        //         printed = snprintf(pcInsert, iInsertLen, "%d min", config.zone_duration[(iIndex-SSI_c1d1d)/7][(iIndex-SSI_c1d1d)%7]);
+        //     }
+        //     else
+        //     {
+        //         printed = snprintf(pcInsert, iInsertLen, "&nbsp;");    
+        //     }                                 
+        // }
+        // break;        
+        // case SSI_clpat: //clpat
+        // {
+        //     printed = snprintf(pcInsert, iInsertLen, "%d", web.led_current_pattern);
+        // } 
+        // break;
+        // case SSI_cltran: //cltran
+        // {
+        //     printed = snprintf(pcInsert, iInsertLen, "%d", web.led_current_transition_delay);
+        // } 
+        // break;  
         case SSI_clreq: //clreq
         {
             printed = snprintf(pcInsert, iInsertLen, "%s", web.led_last_request_ip);
         } 
         break;         
-        case SSI_z1gpio:
-        case SSI_z2gpio:
-        case SSI_z3gpio:
-        case SSI_z4gpio:
-        case SSI_z5gpio:
-        case SSI_z6gpio:
-        case SSI_z7gpio:
-        case SSI_z8gpio:
-        {     
-            printed = snprintf(pcInsert, iInsertLen, "%d", config.zone_gpio[(iIndex-SSI_z1gpio)%8]);             
-        }
-        break;
-        case SSI_z1viz:
-        case SSI_z2viz:
-        case SSI_z3viz:
-        case SSI_z4viz:
-        case SSI_z5viz:
-        case SSI_z6viz:
-        case SSI_z7viz:
-        case SSI_z8viz:
-        {
-            if ((iIndex-SSI_z1viz)%8 >= config.zone_max)
-            {     
-                printed = snprintf(pcInsert, iInsertLen, "style=\"display:none;\"");
-            }
-            else
-            {
-                printed = 0;
-            }             
-        }
-        break; 
-        case SSI_zmax: //zmax
-        {
-            printed = snprintf(pcInsert, iInsertLen, "%d", config.zone_max);
-        }   
-        break;     
+        // case SSI_z1gpio:
+        // case SSI_z2gpio:
+        // case SSI_z3gpio:
+        // case SSI_z4gpio:
+        // case SSI_z5gpio:
+        // case SSI_z6gpio:
+        // case SSI_z7gpio:
+        // case SSI_z8gpio:
+        // {     
+        //     printed = snprintf(pcInsert, iInsertLen, "%d", config.zone_gpio[(iIndex-SSI_z1gpio)%8]);             
+        // }
+        // break;
+        // case SSI_z1viz:
+        // case SSI_z2viz:
+        // case SSI_z3viz:
+        // case SSI_z4viz:
+        // case SSI_z5viz:
+        // case SSI_z6viz:
+        // case SSI_z7viz:
+        // case SSI_z8viz:
+        // {
+        //     if ((iIndex-SSI_z1viz)%8 >= config.zone_max)
+        //     {     
+        //         printed = snprintf(pcInsert, iInsertLen, "style=\"display:none;\"");
+        //     }
+        //     else
+        //     {
+        //         printed = 0;
+        //     }             
+        // }
+        // break; 
+        // case SSI_zmax: //zmax
+        // {
+        //     printed = snprintf(pcInsert, iInsertLen, "%d", config.zone_max);
+        // }   
+        // break;     
         case SSI_rpage: //rpage
         {
             switch(config.personality)
@@ -1710,65 +1720,65 @@ u16_t ssi_handler(int iIndex, char *pcInsert, int iInsertLen)
             
         }   
         break;                  
-        case SSI_z1bviz:
-        case SSI_z2bviz:
-        case SSI_z3bviz:
-        case SSI_z4bviz:
-        case SSI_z5bviz:
-        case SSI_z6bviz:
-        case SSI_z7bviz:
-        case SSI_z8bviz:
-        {
-            if ((iIndex-SSI_z1bviz)%8 >= config.zone_max)
-            {     
-                printed = snprintf(pcInsert, iInsertLen, "style=\"display:none;\"");
-            }
-            else
-            {
-                //printed = snprintf(pcInsert, iInsertLen, "style=\"width:14.285714286%%\"");
-                printed = snprintf(pcInsert, iInsertLen, "style=\"width:13%%\"");                
-            }             
-        }
-        break; 
-        case SSI_z1iviz:
-        case SSI_z2iviz:
-        case SSI_z3iviz:
-        case SSI_z4iviz:
-        case SSI_z5iviz:
-        case SSI_z6iviz:
-        case SSI_z7iviz:
-        case SSI_z8iviz:
-        {
-            if ((iIndex-SSI_z1iviz)%8 >= config.zone_max)
-            {     
-                printed = snprintf(pcInsert, iInsertLen, "style=\"display:none;\"");
-            }
-            else
-            {
-                printed = snprintf(pcInsert, iInsertLen, "style=\"font-size: 28px;\"");
-            }             
-        }
-        break;   
-        case SSI_z1zviz:
-        case SSI_z2zviz:
-        case SSI_z3zviz:
-        case SSI_z4zviz:
-        case SSI_z5zviz:
-        case SSI_z6zviz:
-        case SSI_z7zviz:
-        case SSI_z8zviz:
-        {
-            if ((iIndex-SSI_z1zviz)%8 >= config.zone_max)
-            {     
-                printed = snprintf(pcInsert, iInsertLen, "style=\"display:none;\"");
-            }
-            else
-            {
-                //printed = snprintf(pcInsert, iInsertLen, "style=\"width:14.285714286%%\"");
-                printed = snprintf(pcInsert, iInsertLen, "style=\"width:2%%\"");                
-            }             
-        } 
-        break;      
+        // case SSI_z1bviz:
+        // case SSI_z2bviz:
+        // case SSI_z3bviz:
+        // case SSI_z4bviz:
+        // case SSI_z5bviz:
+        // case SSI_z6bviz:
+        // case SSI_z7bviz:
+        // case SSI_z8bviz:
+        // {
+        //     if ((iIndex-SSI_z1bviz)%8 >= config.zone_max)
+        //     {     
+        //         printed = snprintf(pcInsert, iInsertLen, "style=\"display:none;\"");
+        //     }
+        //     else
+        //     {
+        //         //printed = snprintf(pcInsert, iInsertLen, "style=\"width:14.285714286%%\"");
+        //         printed = snprintf(pcInsert, iInsertLen, "style=\"width:13%%\"");                
+        //     }             
+        // }
+        // break; 
+        // case SSI_z1iviz:
+        // case SSI_z2iviz:
+        // case SSI_z3iviz:
+        // case SSI_z4iviz:
+        // case SSI_z5iviz:
+        // case SSI_z6iviz:
+        // case SSI_z7iviz:
+        // case SSI_z8iviz:
+        // {
+        //     if ((iIndex-SSI_z1iviz)%8 >= config.zone_max)
+        //     {     
+        //         printed = snprintf(pcInsert, iInsertLen, "style=\"display:none;\"");
+        //     }
+        //     else
+        //     {
+        //         printed = snprintf(pcInsert, iInsertLen, "style=\"font-size: 28px;\"");
+        //     }             
+        // }
+        // break;   
+        // case SSI_z1zviz:
+        // case SSI_z2zviz:
+        // case SSI_z3zviz:
+        // case SSI_z4zviz:
+        // case SSI_z5zviz:
+        // case SSI_z6zviz:
+        // case SSI_z7zviz:
+        // case SSI_z8zviz:
+        // {
+        //     if ((iIndex-SSI_z1zviz)%8 >= config.zone_max)
+        //     {     
+        //         printed = snprintf(pcInsert, iInsertLen, "style=\"display:none;\"");
+        //     }
+        //     else
+        //     {
+        //         //printed = snprintf(pcInsert, iInsertLen, "style=\"width:14.285714286%%\"");
+        //         printed = snprintf(pcInsert, iInsertLen, "style=\"width:2%%\"");                
+        //     }             
+        // } 
+        // break;      
         case SSI_z1dur:
         {
             if (config.personality == SPRINKLER_USURPER)
@@ -1810,34 +1820,34 @@ u16_t ssi_handler(int iIndex, char *pcInsert, int iInsertLen)
             }
         }             
         break;
-        case SSI_irgnow: //irgnow
-        {
-            printed = snprintf(pcInsert, iInsertLen, "%s", web.irrigation_test_enable?"checked":"");
-        }   
-        break;
-        case SSI_sp1viz:
-        case SSI_sp2viz:
-        case SSI_sp3viz:
-        case SSI_sp4viz:
-        case SSI_sp5viz:
-        case SSI_sp6viz:
-        case SSI_sp7viz:
-        case SSI_sp8viz:
-        case SSI_sp9viz:
-        case SSI_sp10viz:
-        case SSI_sp11viz:
-        case SSI_sp12viz:
-        {
-            if ((iIndex-SSI_sp1viz)%12 >= config.setpoint_number)
-            {     
-                printed = snprintf(pcInsert, iInsertLen, "style=\"display:none;\"");
-            }
-            else
-            {
-                printed = 0;
-            }             
-        }
-        break;         
+        // case SSI_irgnow: //irgnow
+        // {
+        //     printed = snprintf(pcInsert, iInsertLen, "%s", web.irrigation_test_enable?"checked":"");
+        // }   
+        // break;
+        // case SSI_sp1viz:
+        // case SSI_sp2viz:
+        // case SSI_sp3viz:
+        // case SSI_sp4viz:
+        // case SSI_sp5viz:
+        // case SSI_sp6viz:
+        // case SSI_sp7viz:
+        // case SSI_sp8viz:
+        // case SSI_sp9viz:
+        // case SSI_sp10viz:
+        // case SSI_sp11viz:
+        // case SSI_sp12viz:
+        // {
+        //     if ((iIndex-SSI_sp1viz)%12 >= config.setpoint_number)
+        //     {     
+        //         printed = snprintf(pcInsert, iInsertLen, "style=\"display:none;\"");
+        //     }
+        //     else
+        //     {
+        //         printed = 0;
+        //     }             
+        // }
+        // break;         
         case SSI_sp1nme: //sp1nme
         case SSI_sp2nme: //sp2nme
         case SSI_sp3nme: //sp3nme
@@ -1928,43 +1938,43 @@ u16_t ssi_handler(int iIndex, char *pcInsert, int iInsertLen)
         //     }
         // }                     
         // break;
-        case SSI_ts1st:
-        case SSI_ts2st:
-        case SSI_ts3st:
-        case SSI_ts4st:
-        case SSI_ts5st:
-        case SSI_ts6st:
-        case SSI_ts7st:
-        case SSI_ts8st:
-        case SSI_ts9st:
-        case SSI_ts10st:
-        case SSI_ts11st:
-        case SSI_ts12st:
-        case SSI_ts13st:
-        case SSI_ts14st:
-        case SSI_ts15st:
-        case SSI_ts16st:
-        case SSI_ts17st:
-        case SSI_ts18st:
-        case SSI_ts19st:
-        case SSI_ts20st:
-        case SSI_ts21st:
-        case SSI_ts22st:
-        case SSI_ts23st:
-        case SSI_ts24st:
-        case SSI_ts25st:
-        case SSI_ts26st:
-        case SSI_ts27st:
-        case SSI_ts28st:
-        case SSI_ts29st:
-        case SSI_ts30st:
-        case SSI_ts31st:
-        case SSI_ts32st:                        
-        {
-            //printed = mow_to_string(pcInsert, iInsertLen, config.setpoint_start_mow[iIndex-SSI_ts1st]);
-            printed = mow_to_time_string(pcInsert, iInsertLen, config.setpoint_start_mow[iIndex-SSI_ts1st]);            
-        }
-        break; 
+        // case SSI_ts1st:
+        // case SSI_ts2st:
+        // case SSI_ts3st:
+        // case SSI_ts4st:
+        // case SSI_ts5st:
+        // case SSI_ts6st:
+        // case SSI_ts7st:
+        // case SSI_ts8st:
+        // case SSI_ts9st:
+        // case SSI_ts10st:
+        // case SSI_ts11st:
+        // case SSI_ts12st:
+        // case SSI_ts13st:
+        // case SSI_ts14st:
+        // case SSI_ts15st:
+        // case SSI_ts16st:
+        // case SSI_ts17st:
+        // case SSI_ts18st:
+        // case SSI_ts19st:
+        // case SSI_ts20st:
+        // case SSI_ts21st:
+        // case SSI_ts22st:
+        // case SSI_ts23st:
+        // case SSI_ts24st:
+        // case SSI_ts25st:
+        // case SSI_ts26st:
+        // case SSI_ts27st:
+        // case SSI_ts28st:
+        // case SSI_ts29st:
+        // case SSI_ts30st:
+        // case SSI_ts31st:
+        // case SSI_ts32st:                        
+        // {
+        //     //printed = mow_to_string(pcInsert, iInsertLen, config.setpoint_start_mow[iIndex-SSI_ts1st]);
+        //     printed = mow_to_time_string(pcInsert, iInsertLen, config.setpoint_start_mow[iIndex-SSI_ts1st]);            
+        // }
+        // break; 
         // case SSI_sp1mde:
         // case SSI_sp2mde:
         // case SSI_sp3mde:
@@ -2047,52 +2057,52 @@ u16_t ssi_handler(int iIndex, char *pcInsert, int iInsertLen)
             printf("error - thermostat_period_end_mow is no longer supported\n");
         }
         break;                  
-        case SSI_ts1vz:
-        case SSI_ts2vz:
-        case SSI_ts3vz:
-        case SSI_ts4vz:
-        case SSI_ts5vz:
-        case SSI_ts6vz:
-        case SSI_ts7vz:
-        case SSI_ts8vz:
-        case SSI_ts9vz:
-        case SSI_ts10vz:
-        case SSI_ts11vz:
-        case SSI_ts12vz:
-        case SSI_ts13vz:
-        case SSI_ts14vz:
-        case SSI_ts15vz:
-        case SSI_ts16vz:
-        case SSI_ts17vz:
-        case SSI_ts18vz:
-        case SSI_ts19vz:
-        case SSI_ts20vz:
-        case SSI_ts21vz:
-        case SSI_ts22vz:
-        case SSI_ts23vz:
-        case SSI_ts24vz:
-        case SSI_ts25vz:
-        case SSI_ts26vz:
-        case SSI_ts27vz:
-        case SSI_ts28vz:
-        case SSI_ts29vz:
-        case SSI_ts30vz:
-        case SSI_ts31vz:
-        case SSI_ts32vz:                        
-        {
-            //printf("row = %d web.day= %d mow = %d dfm = %d\n", (iIndex-SSI_ts1vz)%16, web.thermostat_day, config.setpoint_start_mow[iIndex-SSI_ts1vz], get_day_from_mow(config.setpoint_start_mow[iIndex-SSI_ts1vz]));
-            //if ((iIndex-SSI_ts1vz)%16 >= config.thermostat_period_number)
-            if ((get_day_from_mow(config.setpoint_start_mow[iIndex-SSI_ts1vz]) != web.thermostat_day) ||
-                (config.setpoint_start_mow[iIndex-SSI_ts1vz] <0))
-            {     
-                printed = snprintf(pcInsert, iInsertLen, "style=\"display:none;\"");
-            }
-            else
-            {
-                printed = 0;
-            }             
-        }
-        break;   
+        // case SSI_ts1vz:
+        // case SSI_ts2vz:
+        // case SSI_ts3vz:
+        // case SSI_ts4vz:
+        // case SSI_ts5vz:
+        // case SSI_ts6vz:
+        // case SSI_ts7vz:
+        // case SSI_ts8vz:
+        // case SSI_ts9vz:
+        // case SSI_ts10vz:
+        // case SSI_ts11vz:
+        // case SSI_ts12vz:
+        // case SSI_ts13vz:
+        // case SSI_ts14vz:
+        // case SSI_ts15vz:
+        // case SSI_ts16vz:
+        // case SSI_ts17vz:
+        // case SSI_ts18vz:
+        // case SSI_ts19vz:
+        // case SSI_ts20vz:
+        // case SSI_ts21vz:
+        // case SSI_ts22vz:
+        // case SSI_ts23vz:
+        // case SSI_ts24vz:
+        // case SSI_ts25vz:
+        // case SSI_ts26vz:
+        // case SSI_ts27vz:
+        // case SSI_ts28vz:
+        // case SSI_ts29vz:
+        // case SSI_ts30vz:
+        // case SSI_ts31vz:
+        // case SSI_ts32vz:                        
+        // {
+        //     //printf("row = %d web.day= %d mow = %d dfm = %d\n", (iIndex-SSI_ts1vz)%16, web.thermostat_day, config.setpoint_start_mow[iIndex-SSI_ts1vz], get_day_from_mow(config.setpoint_start_mow[iIndex-SSI_ts1vz]));
+        //     //if ((iIndex-SSI_ts1vz)%16 >= config.thermostat_period_number)
+        //     if ((get_day_from_mow(config.setpoint_start_mow[iIndex-SSI_ts1vz]) != web.thermostat_day) ||
+        //         (config.setpoint_start_mow[iIndex-SSI_ts1vz] <0))
+        //     {     
+        //         printed = snprintf(pcInsert, iInsertLen, "style=\"display:none;\"");
+        //     }
+        //     else
+        //     {
+        //         printed = 0;
+        //     }             
+        // }
+        // break;   
         case SSI_ts1in:
         case SSI_ts2in:
         case SSI_ts3in:
@@ -2115,64 +2125,64 @@ u16_t ssi_handler(int iIndex, char *pcInsert, int iInsertLen)
             printf("error - thermostat_period_setpoint_index is no longer supported\n");
         }
         break;                      
-        case SSI_pwip:
-        {
-            printed = snprintf(pcInsert, iInsertLen, "%s", config.powerwall_ip);
-        }
-        break;
-        case SSI_pwhost:
-        {
-            printed = snprintf(pcInsert, iInsertLen, "%s", config.powerwall_hostname);
-        }
-        break; 
+        // case SSI_pwip:
+        // {
+        //     printed = snprintf(pcInsert, iInsertLen, "%s", config.powerwall_ip);
+        // }
+        // break;
+        // case SSI_pwhost:
+        // {
+        //     printed = snprintf(pcInsert, iInsertLen, "%s", config.powerwall_hostname);
+        // }
+        // break; 
         case SSI_pwpass:
         {
             //printed = snprintf(pcInsert, iInsertLen, "%s", config.powerwall_password);
             printed = snprintf(pcInsert, iInsertLen, "********");
         }
         break;
-        case SSI_pwgdhd:
-        {
-            printed = snprintf(pcInsert, iInsertLen, "%ld.%ld", config.grid_down_heating_setpoint_decrease/10, config.grid_down_heating_setpoint_decrease%10);
-        }
-        break;        
-        case SSI_pwgdci:
-        {
-            printed = snprintf(pcInsert, iInsertLen, "%ld.%ld", config.grid_down_cooling_setpoint_increase/10, config.grid_down_cooling_setpoint_increase%10);            
-        }
-        break;
-        case SSI_pwblhd:
-        {
-            printed = snprintf(pcInsert, iInsertLen, "%ld.%ld", config.grid_down_heating_disable_battery_level/10, config.grid_down_heating_disable_battery_level%10);            
-        }
-        break;        
-        case SSI_pwblhe:
-        {
-            printed = snprintf(pcInsert, iInsertLen, "%ld.%ld", config.grid_down_heating_enable_battery_level/10, config.grid_down_heating_enable_battery_level%10);            
-        }
-        break;
-        case SSI_pwblcd:
-        {
-            printed = snprintf(pcInsert, iInsertLen, "%ld.%ld", config.grid_down_cooling_disable_battery_level/10, config.grid_down_cooling_disable_battery_level%10);            
-        }
-        break;   
-        case SSI_pwblce:
-        {
-            printed = snprintf(pcInsert, iInsertLen, "%ld.%ld", config.grid_down_cooling_enable_battery_level/10, config.grid_down_cooling_enable_battery_level%10);            
-        }
-        break; 
-        case SSI_tday:
-        {
-            printed = snprintf(pcInsert, iInsertLen, "%s", day_name(web.thermostat_day));            
-        }
-        break;   
-        case SSI_tpst:
-        {
-            CLIP(web.thermostat_period_row, 0, NUM_ROWS(config.setpoint_start_mow));
-            //printed = mow_to_string(pcInsert, iInsertLen, config.setpoint_start_mow[web.thermostat_period_row]);
-            printed = mow_to_time_string(pcInsert, iInsertLen, config.setpoint_start_mow[web.thermostat_period_row]);            
-        }
-        break; 
+        // case SSI_pwgdhd:
+        // {
+        //     printed = snprintf(pcInsert, iInsertLen, "%ld.%ld", config.grid_down_heating_setpoint_decrease/10, config.grid_down_heating_setpoint_decrease%10);
+        // }
+        // break;        
+        // case SSI_pwgdci:
+        // {
+        //     printed = snprintf(pcInsert, iInsertLen, "%ld.%ld", config.grid_down_cooling_setpoint_increase/10, config.grid_down_cooling_setpoint_increase%10);            
+        // }
+        // break;
+        // case SSI_pwblhd:
+        // {
+        //     printed = snprintf(pcInsert, iInsertLen, "%ld.%ld", config.grid_down_heating_disable_battery_level/10, config.grid_down_heating_disable_battery_level%10);            
+        // }
+        // break;        
+        // case SSI_pwblhe:
+        // {
+        //     printed = snprintf(pcInsert, iInsertLen, "%ld.%ld", config.grid_down_heating_enable_battery_level/10, config.grid_down_heating_enable_battery_level%10);            
+        // }
+        // break;
+        // case SSI_pwblcd:
+        // {
+        //     printed = snprintf(pcInsert, iInsertLen, "%ld.%ld", config.grid_down_cooling_disable_battery_level/10, config.grid_down_cooling_disable_battery_level%10);            
+        // }
+        // break;   
+        // case SSI_pwblce:
+        // {
+        //     printed = snprintf(pcInsert, iInsertLen, "%ld.%ld", config.grid_down_cooling_enable_battery_level/10, config.grid_down_cooling_enable_battery_level%10);            
+        // }
+        // break; 
+        // case SSI_tday:
+        // {
+        //     printed = snprintf(pcInsert, iInsertLen, "%s", day_name(web.thermostat_day));            
+        // }
+        // break;   
+        // case SSI_tpst:
+        // {
+        //     CLIP(web.thermostat_period_row, 0, NUM_ROWS(config.setpoint_start_mow));
+        //     //printed = mow_to_string(pcInsert, iInsertLen, config.setpoint_start_mow[web.thermostat_period_row]);
+        //     printed = mow_to_time_string(pcInsert, iInsertLen, config.setpoint_start_mow[web.thermostat_period_row]);            
+        // }
+        // break; 
         // case SSI_tptmp:
         // {
         //     CLIP(web.thermostat_period_row, 0, NUM_ROWS(config.setpoint_temperaturex10));
@@ -2215,45 +2225,45 @@ u16_t ssi_handler(int iIndex, char *pcInsert, int iInsertLen)
         //     }
         // }
         // break;          
-        case SSI_tpsm1:
-        case SSI_tpsm2:
-        case SSI_tpsm3:
-        case SSI_tpsm4:
-        case SSI_tpsm5:
-        case SSI_tpsm6:        
-        {
-            CLIP(web.thermostat_period_row, 0, NUM_ROWS(config.setpoint_mode));
+        // case SSI_tpsm1:
+        // case SSI_tpsm2:
+        // case SSI_tpsm3:
+        // case SSI_tpsm4:
+        // case SSI_tpsm5:
+        // case SSI_tpsm6:        
+        // {
+        //     CLIP(web.thermostat_period_row, 0, NUM_ROWS(config.setpoint_mode));
 
-            if (config.setpoint_mode[web.thermostat_period_row] == (iIndex-SSI_tpsm1))
-            {
-                printed = snprintf(pcInsert, iInsertLen, "selected"); 
-            }
-            else
-            {
-                printed = snprintf(pcInsert, iInsertLen, ""); 
-            }
-        }
-        break;         
-        case SSI_tsaddvz:
-        {
-            for(i=0; i < NUM_ROWS(config.setpoint_start_mow); i++)
-            {
-                if (config.setpoint_start_mow[i] < 0)
-                {
-                    new_thermostat_period_found = true;
-                    break;
-                }
-            }
-            if (!new_thermostat_period_found)
-            {     
-                printed = snprintf(pcInsert, iInsertLen, "style=\"display:none;\"");
-            }
-            else
-            {
-                printed = 0;
-            }            
-        }
-        break;
+        //     if (config.setpoint_mode[web.thermostat_period_row] == (iIndex-SSI_tpsm1))
+        //     {
+        //         printed = snprintf(pcInsert, iInsertLen, "selected"); 
+        //     }
+        //     else
+        //     {
+        //         printed = snprintf(pcInsert, iInsertLen, ""); 
+        //     }
+        // }
+        // break;         
+        // case SSI_tsaddvz:
+        // {
+        //     for(i=0; i < NUM_ROWS(config.setpoint_start_mow); i++)
+        //     {
+        //         if (config.setpoint_start_mow[i] < 0)
+        //         {
+        //             new_thermostat_period_found = true;
+        //             break;
+        //         }
+        //     }
+        //     if (!new_thermostat_period_found)
+        //     {     
+        //         printed = snprintf(pcInsert, iInsertLen, "style=\"display:none;\"");
+        //     }
+        //     else
+        //     {
+        //         printed = 0;
+        //     }            
+        // }
+        // break;
         // case SSI_tg0_0:
         // case SSI_tg0_1:
         // case SSI_tg0_2:
@@ -2351,20 +2361,20 @@ u16_t ssi_handler(int iIndex, char *pcInsert, int iInsertLen)
         //     }
         // }                     
         // break; 
-        case SSI_tct:  // thermostat current temperature
-        {
-            printed = snprintf(pcInsert, iInsertLen, "%c%d.%d", web.thermostat_temperature<0?'-':' ', abs(web.thermostat_temperature/10), abs(web.thermostat_temperature%10)); 
-            // if (!config.use_archaic_units)
-            // {
-            //     printed = snprintf(pcInsert, iInsertLen, "%c%d.%d", web.thermostat_temperature<0?'-':' ', abs(web.thermostat_temperature/10), abs(web.thermostat_temperature%10)); 
-            // }
-            // else
-            // {
-            //     temp = (web.thermostat_temperature*9)/5 + 320;
-            //     printed = snprintf(pcInsert, iInsertLen, "%c%ld.%ld", temp<0?'-':' ', abs(temp)/10, abs(temp%10));
-            // }  
-        }       
-        break;  
+        // case SSI_tct:  // thermostat current temperature
+        // {
+        //     printed = snprintf(pcInsert, iInsertLen, "%c%d.%d", web.thermostat_temperature<0?'-':' ', abs(web.thermostat_temperature/10), abs(web.thermostat_temperature%10)); 
+        //     // if (!config.use_archaic_units)
+        //     // {
+        //     //     printed = snprintf(pcInsert, iInsertLen, "%c%d.%d", web.thermostat_temperature<0?'-':' ', abs(web.thermostat_temperature/10), abs(web.thermostat_temperature%10)); 
+        //     // }
+        //     // else
+        //     // {
+        //     //     temp = (web.thermostat_temperature*9)/5 + 320;
+        //     //     printed = snprintf(pcInsert, iInsertLen, "%c%ld.%ld", temp<0?'-':' ', abs(temp)/10, abs(temp%10));
+        //     // }  
+        // }       
+        // break;  
 #ifdef INCORPORATE_THERMOSTAT              
         case SSI_tcs:  // thermostat current setpoint
         {
@@ -2375,42 +2385,42 @@ u16_t ssi_handler(int iIndex, char *pcInsert, int iInsertLen)
         }
         break;
 #endif
-        case SSI_thgpio:
-        {
-            if (gpio_valid(config.heating_gpio))
-            {
-                printed = snprintf(pcInsert, iInsertLen, "%d", config.heating_gpio);
-            }
-            else
-            {
-                printed = snprintf(pcInsert, iInsertLen, "none");
-            }
-        }
-        break;
-        case SSI_tcgpio:
-        {
-            if (gpio_valid(config.cooling_gpio))
-            {
-                printed = snprintf(pcInsert, iInsertLen, "%d", config.cooling_gpio);
-            }
-            else
-            {
-                printed = snprintf(pcInsert, iInsertLen, "none");
-            }            
-        }
-        break; 
-        case SSI_tfgpio:
-        {
-            if (gpio_valid(config.fan_gpio))
-            {
-                printed = snprintf(pcInsert, iInsertLen, "%d", config.fan_gpio);
-            }
-            else
-            {
-                printed = snprintf(pcInsert, iInsertLen, "none");
-            }            
-        }
-        break;                  
+        // case SSI_thgpio:
+        // {
+        //     if (gpio_valid(config.heating_gpio))
+        //     {
+        //         printed = snprintf(pcInsert, iInsertLen, "%d", config.heating_gpio);
+        //     }
+        //     else
+        //     {
+        //         printed = snprintf(pcInsert, iInsertLen, "none");
+        //     }
+        // }
+        // break;
+        // case SSI_tcgpio:
+        // {
+        //     if (gpio_valid(config.cooling_gpio))
+        //     {
+        //         printed = snprintf(pcInsert, iInsertLen, "%d", config.cooling_gpio);
+        //     }
+        //     else
+        //     {
+        //         printed = snprintf(pcInsert, iInsertLen, "none");
+        //     }            
+        // }
+        // break; 
+        // case SSI_tfgpio:
+        // {
+        //     if (gpio_valid(config.fan_gpio))
+        //     {
+        //         printed = snprintf(pcInsert, iInsertLen, "%d", config.fan_gpio);
+        //     }
+        //     else
+        //     {
+        //         printed = snprintf(pcInsert, iInsertLen, "none");
+        //     }            
+        // }
+        // break;                  
         case SSI_gpiou:
         {
             print_gpio_pins_matching_default(gpio_list, sizeof(gpio_list), GP_UNINITIALIZED);
@@ -2451,21 +2461,21 @@ u16_t ssi_handler(int iIndex, char *pcInsert, int iInsertLen)
             printed = snprintf(pcInsert, iInsertLen, "%s", gpio_list);       
         }
         break;
-        case SSI_tsadr1: //tsdar1
-        case SSI_tsadr2: //tsdar2
-        case SSI_tsadr3: //tsdar3
-        case SSI_tsadr4: //tsdar4
-        case SSI_tsadr5: //tsdar5
-        case SSI_tsadr6: //tsdar6               
-        {
-            printed = snprintf(pcInsert, iInsertLen, "%s", config.temperature_sensor_remote_ip[iIndex-SSI_tsadr1]); 
-        }                     
-        break;      
-        case SSI_tempth: //SSI_tempth
-        {
-            printed = snprintf(pcInsert, iInsertLen, "%d.%d", config.outside_temperature_threshold/10, config.outside_temperature_threshold%10);   
-        }               
-        break;          
+        // case SSI_tsadr1: //tsdar1
+        // case SSI_tsadr2: //tsdar2
+        // case SSI_tsadr3: //tsdar3
+        // case SSI_tsadr4: //tsdar4
+        // case SSI_tsadr5: //tsdar5
+        // case SSI_tsadr6: //tsdar6               
+        // {
+        //     printed = snprintf(pcInsert, iInsertLen, "%s", config.temperature_sensor_remote_ip[iIndex-SSI_tsadr1]); 
+        // }                     
+        // break;      
+        // case SSI_tempth: //SSI_tempth
+        // {
+        //     printed = snprintf(pcInsert, iInsertLen, "%d.%d", config.outside_temperature_threshold/10, config.outside_temperature_threshold%10);   
+        // }               
+        // break;          
 #ifdef INCORPORATE_THERMOSTAT  
         case SSI_tint:  // thermostat indoor temperature
         {

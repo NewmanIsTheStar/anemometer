@@ -56,18 +56,18 @@ int init_web_variables(void)
 
     web.access_point_mode = 0;
     
-    web.outside_temperature = 0;
-    web.wind_speed = 0;
-    web.daily_rain = 0;
-    web.weekly_rain = 0;
-    web.trailing_seven_days_rain = 0;
+    // web.outside_temperature = 0;
+    // web.wind_speed = 0;
+    // web.daily_rain = 0;
+    // web.weekly_rain = 0;
+    // web.trailing_seven_days_rain = 0;
     web.us_last_rx_packet = 0;  
-    web.soil_moisture[0] = 0; 
+    // web.soil_moisture[0] = 0; 
 
-    web.irrigation_test_enable = 0; 
+    // web.irrigation_test_enable = 0; 
 
-    STRNCPY(web.last_usurped_timestring,"never", sizeof(web.last_usurped_timestring));
-    STRNCPY(web.last_completed_timestring,"never", sizeof(web.last_completed_timestring));    
+    // STRNCPY(web.last_usurped_timestring,"never", sizeof(web.last_usurped_timestring));
+    // STRNCPY(web.last_completed_timestring,"never", sizeof(web.last_completed_timestring));    
     STRNCPY(web.watchdog_timestring,"never", sizeof(web.watchdog_timestring));
 
     web.status_message[0] = 0;
@@ -77,21 +77,23 @@ int init_web_variables(void)
     web.bind_failures = 0;
     web.connect_failures = 0;  
     web.syslog_transmit_failures = 0;
-    web.govee_transmit_failures = 0;
-    web.weather_station_transmit_failures = 0;
+    // web.govee_transmit_failures = 0;
+    // web.weather_station_transmit_failures = 0;
     web.bind_failures = 0;
     web.connect_failures = 0;   
 
-    web.led_current_pattern = 0;
-    web.led_current_transition_delay = 0;
+    // web.led_current_pattern = 0;
+    // web.led_current_transition_delay = 0;
     web.led_last_request_ip[0] = 0;
 
     STRNCPY(web.software_server,"psycho.badnet", sizeof(web.software_server));
     STRNCPY(web.software_url,"fileserver.psycho", sizeof(web.software_url));
-    STRNCPY(web.software_file,"/pluto.bin", sizeof(web.software_file));        
+    STRNCPY(web.software_file,"/pluto.bin", sizeof(web.software_file));      
+    
+    //TODO: initialize anemometer variables!
 
     // set default web page
-    set_calendar_html_page();
+    // set_calendar_html_page();
 
     return(0);
 }

@@ -33,7 +33,7 @@
 
 
 
-
+extern uint32_t unix_time;
 extern WEB_VARIABLES_T web;
 extern NON_VOL_VARIABLES_T config;
 
@@ -90,7 +90,8 @@ extern NON_VOL_VARIABLES_T config;
     x(hostn) \
     x(mquser) \
     x(mqpass) \
-    x(mqaddr) 
+    x(mqaddr) \
+    x(uptme)
 
 
 /*List of SSI tags used in html files
@@ -796,7 +797,14 @@ u16_t ssi_handler(int iIndex, char *pcInsert, int iInsertLen)
         // {
         //     printed = snprintf(pcInsert, iInsertLen, "%s", web.last_completed_timestring);    
         // }
-        // break;        
+        // break;  
+        case SSI_uptme: // uptme
+        {
+            printed = get_delta_string_from_delta_seconds(pcInsert, iInsertLen, unix_time - web.boot_time);
+            //printed = snprintf(pcInsert, iInsertLen, "%d", unix_time - web.boot_time);
+        }               
+        break;
+                      
         case SSI_time: // time
         {
             if(!get_timestamp(timestamp, sizeof(timestamp), false, false)) {

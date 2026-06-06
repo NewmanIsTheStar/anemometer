@@ -1,3 +1,0 @@
-// version.h.in
-#define GIT_HASH "@GIT_HASH@"
-

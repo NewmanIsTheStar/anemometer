@@ -22,7 +22,8 @@ typedef enum
     LED_STRIP_CONTROLLER       =   2,             // allows remote control of an led strip
     HVAC_THERMOSTAT            =   3,             // wifi confrolled thermostat
     HOME_CONTROLLER            =   4,             // home controller
-    ANEMOMETER                 =   5,             // anemometer
+    REMOTE_SWITCH              =   5,             // wifi controlled relays
+    ANEMOMETER                 =   6,             // anemometer
     
     NO_PERSONALITY             =   4294967295     // force enum to be 4 bytes long 
 } PERSONALITY_E;
@@ -51,13 +52,12 @@ typedef enum
 
 /*
 * current non-volatile memory structure
-* Modification Rule 1 -- copy this structure, append a version number and place at the bottom of this file before making changes
+* Modification Rule 1 -- copy this structure, append a version number(format "_VERSION_X") and place at the bottom of this file before making changes
 * Modification Rule 2 -- only add new fields, do not reorder or resize existing fields (except crc)
 * Modification Rule 3 -- crc field must always be last (used to find end of config in flash)
 * Modification Rule 4 -- add an upgrade function to convert from previous version and add this function to the config_info table
 * Modification Rule 5 -- the config size must never reduce as conversions occur within memory allocated for the latest version
 */
-
 
 // current version
 typedef struct

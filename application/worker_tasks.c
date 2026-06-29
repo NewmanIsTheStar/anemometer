@@ -23,7 +23,7 @@
 WORKER_TASK_T worker_tasks[] =
 {
     //  function        name                    stack   priority        
-    {   anemometer_task,"Anemometer Task",      8096,   5},       
+    {   anemometer_task,"Anemometer Task",      8096,   1},       
     {   message_task,   "Message Task",         1024,   1},      
 
 

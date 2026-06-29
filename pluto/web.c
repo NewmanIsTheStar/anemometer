@@ -70,6 +70,8 @@ int init_web_variables(void)
     // STRNCPY(web.last_completed_timestring,"never", sizeof(web.last_completed_timestring));    
     STRNCPY(web.watchdog_timestring,"never", sizeof(web.watchdog_timestring));
 
+    web.mqtt_client_name[0] = 0;
+    
     web.status_message[0] = 0;
     web.stack_message[0] = 0;
 
